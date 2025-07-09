@@ -31,4 +31,8 @@ export const routes: Routes = [
     path: 'mapa',
     loadComponent: () => import('./mapa/mapa.page').then( m => m.MapaPage)
   },
+  {
+    path: 'perfil',
+    loadComponent: () => import('./perfil/perfil.page').then( m => m.PerfilPage)
+  },
 ];
