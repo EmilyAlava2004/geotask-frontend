@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonCheckbox, IonHeader, IonTitle, IonToolbar, IonButton, IonIcon, IonLabel, IonItem } from '@ionic/angular/standalone';
+import { IonContent, IonCheckbox,IonButton, IonIcon, IonLabel, IonItem } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { ViewChild } from '@angular/core';
@@ -15,7 +15,7 @@ import { AuthService } from '../services/auth.service';
   templateUrl: './registrer.page.html',
   styleUrls: ['./registrer.page.scss'],
   standalone: true,
-    imports: [IonItem, IonInput, IonLabel, IonCheckbox, IonIcon, IonButton, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+    imports: [IonItem, IonInput, IonLabel, IonCheckbox, IonIcon, IonButton, IonContent, CommonModule, FormsModule]
 })
 export class RegistrerPage  {
 

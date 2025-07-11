@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonCheckbox, IonHeader, IonTitle, IonToolbar, IonButton, IonIcon, IonLabel, IonItem } from '@ionic/angular/standalone';
+import { IonContent, IonCheckbox, IonButton, IonIcon, IonLabel, IonItem } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { ViewChild } from '@angular/core';
@@ -23,7 +23,7 @@ import { HttpClientModule } from '@angular/common/http';
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [IonItem,HttpClientModule,IonInput, IonLabel,IonCheckbox, IonIcon, IonButton, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule,]
+  imports: [IonItem,HttpClientModule,IonInput, IonLabel,IonCheckbox, IonIcon, IonButton, IonContent, CommonModule, FormsModule,]
 })
 export class LoginPage {
   email: string = '';

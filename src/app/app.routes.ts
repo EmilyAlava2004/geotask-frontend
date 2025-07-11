@@ -8,6 +8,18 @@ export const routes: Routes = [
     path: 'home',
     loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
   },
+   {
+    path: 'tareas',
+    loadComponent: () => import('./tareas/tareas.page').then( m => m.TareasPage)
+  },
+  {
+    path: 'mapa',
+    loadComponent: () => import('./mapa/mapa.page').then( m => m.MapaPage)
+  },
+  {
+    path: 'perfil',
+    loadComponent: () => import('./perfil/perfil.page').then( m => m.PerfilPage)
+  },
   ]
   },
   {
@@ -23,16 +35,5 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () => import('./login/login.page').then( m => m.LoginPage)
   },
-  {
-    path: 'tareas',
-    loadComponent: () => import('./tareas/tareas.page').then( m => m.TareasPage)
-  },
-  {
-    path: 'mapa',
-    loadComponent: () => import('./mapa/mapa.page').then( m => m.MapaPage)
-  },
-  {
-    path: 'perfil',
-    loadComponent: () => import('./perfil/perfil.page').then( m => m.PerfilPage)
-  },
+ 
 ];
