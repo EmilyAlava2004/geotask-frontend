@@ -1,16 +1,203 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-title>Tareas</ion-title>
-  </ion-toolbar>
-</ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title>GeoTask Manager</ion-title>
+      </ion-toolbar>
+    </ion-header>
 
 <ion-content [fullscreen]="true">
+  <!-- Pull to refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content pullingIcon="chevron-down-circle-outline" refreshingSpinner="circles">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Header alternativo cuando sea fullscreen -->
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">tareas</ion-title>
+      <ion-title size="large">Mis Tareas</ion-title>
     </ion-toolbar>
   </ion-header>
+
+  <!-- Barra de búsqueda -->
+  <div class="search-container">
+    <ion-searchbar 
+      placeholder="Buscar tareas..." 
+      [value]="searchTerm"
+      (ionInput)="onSearchChange($event)"
+      show-clear-button="focus">
+    </ion-searchbar>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-container">
+    <!-- Filtro por estado -->
+    <ion-segment 
+      [value]="selectedSegment" 
+      (ionChange)="onSegmentChange($event)"
+      mode="md"
+      class="status-segment">
+      <ion-segment-button value="all">
+        <ion-label>Todas</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="pending">
+        <ion-label>Pendientes</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="in-progress">
+        <ion-label>En Progreso</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="completed">
+        <ion-label>Completadas</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <!-- Filtros adicionales -->
+    <ion-grid class="additional-filters">
+      <ion-row>
+        <ion-col size="6">
+          <ion-item>
+            <ion-select 
+              placeholder="Prioridad" 
+              [value]="selectedPriority"
+              (ionChange)="onPriorityChange($event)">
+              <ion-select-option value="all">Todas las prioridades</ion-select-option>
+              <ion-select-option value="high">Alta</ion-select-option>
+              <ion-select-option value="medium">Media</ion-select-option>
+              <ion-select-option value="low">Baja</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+        <ion-col size="6">
+          <ion-item>
+            <ion-select 
+              placeholder="Categoría" 
+              [value]="selectedCategory"
+              (ionChange)="onCategoryChange($event)">
+              <ion-select-option value="all">Todas las categorías</ion-select-option>
+              <ion-select-option *ngFor="let category of categories" [value]="category">
+                {{category}}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <!-- Loading indicator -->
+  <ion-progress-bar *ngIf="isLoading" type="indeterminate" color="primary"></ion-progress-bar>
+
+  <!-- Lista de tareas -->
+  <div class="tasks-container">
+    <div *ngIf="filteredTasks.length === 0 && !isLoading" class="empty-state">
+      <ion-icon name="document-text-outline" size="large"></ion-icon>
+      <h3>No hay tareas</h3>
+      <p>No se encontraron tareas que coincidan con tus filtros</p>
+    </div>
+
+    <ion-card 
+      *ngFor="let task of filteredTasks" 
+      class="task-card"
+      [class.completed]="task.status === 'completed'"
+      [class.overdue]="isOverdue(task.dueDate) && task.status !== 'completed'">
+      
+      <!-- Header de la tarea -->
+      <ion-card-header>
+        <div class="task-header">
+          <div class="task-main-info">
+            <ion-card-title class="task-title">{{ task.title }}</ion-card-title>
+            <div class="task-meta">
+              <ion-chip 
+                [color]="getStatusColor(task.status)" 
+                class="status-chip">
+                <ion-icon [name]="getStatusIcon(task.status)"></ion-icon>
+                <ion-label>{{ getStatusText(task.status) }}</ion-label>
+              </ion-chip>
+              <ion-chip 
+                [color]="getPriorityColor(task.priority)"
+                class="priority-chip">
+                <ion-label>{{ getPriorityText(task.priority) }}</ion-label>
+              </ion-chip>
+            </div>
+          </div>
+          <div class="task-actions">
+            <ion-checkbox 
+              [checked]="task.status === 'completed'"
+              (ionChange)="toggleTaskStatus(task)"
+              class="task-checkbox">
+            </ion-checkbox>
+          </div>
+        </div>
+      </ion-card-header>
+
+      <!-- Contenido de la tarea -->
+      <ion-card-content>
+        <p class="task-description">{{ task.description }}</p>
+        
+        <!-- Información de ubicación -->
+        <div class="location-info">
+          <ion-icon name="location-outline" color="medium"></ion-icon>
+          <div class="location-details">
+            <span class="location-name">{{ task.location.name }}</span>
+            <span class="location-address">{{ task.location.address }}</span>
+          </div>
+          <ion-badge color="primary" *ngIf="task.distance">
+            {{ formatDistance(task.distance) }}
+          </ion-badge>
+        </div>
+
+        <!-- Información de fecha -->
+        <div class="date-info">
+          <ion-icon name="time-outline" [color]="isOverdue(task.dueDate) && task.status !== 'completed' ? 'danger' : 'medium'"></ion-icon>
+          <span 
+            class="due-date"
+            [class.overdue-text]="isOverdue(task.dueDate) && task.status !== 'completed'">
+            Vence: {{ formatDate(task.dueDate) }}
+          </span>
+        </div>
+
+        <!-- Categoría -->
+        <div class="category-info">
+          <ion-chip color="tertiary" outline>
+            <ion-label>{{ task.category }}</ion-label>
+          </ion-chip>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="action-buttons">
+          <ion-button 
+            fill="clear" 
+            size="small" 
+            (click)="viewOnMap(task)">
+            <ion-icon name="map-outline" slot="start"></ion-icon>
+            Ver en Mapa
+          </ion-button>
+          <ion-button 
+            fill="clear" 
+            size="small" 
+            (click)="editTask(task)">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            Editar
+          </ion-button>
+          <ion-button 
+            fill="clear" 
+            size="small" 
+            color="danger"
+            (click)="deleteTask(task)">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            Eliminar
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Floating Action Button -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="createNewTask()" color="secondary">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

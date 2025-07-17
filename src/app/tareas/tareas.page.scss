@@ -1,0 +1,569 @@
+// Variables principales
+:root {
+  --task-card-border-radius: 16px;
+  --task-card-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  --task-card-margin: 12px;
+  --task-card-padding: 16px;
+  --animation-duration: 0.3s;
+}
+
+// Contenedor principal
+ion-content {
+  --background: #f8f9fa;
+}
+
+// Contenedor de búsqueda
+.search-container {
+  padding: 16px;
+  background: var(--ion-color-primary);
+  margin-bottom: 0;
+
+  ion-searchbar {
+    --background: rgba(255, 255, 255, 0.9);
+    --border-radius: 12px;
+    --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --placeholder-color: #666;
+    --color: #333;
+    
+    &::part(icon) {
+      color: var(--ion-color-primary);
+    }
+  }
+}
+
+// Contenedor de filtros
+.filters-container {
+  background: white;
+  padding: 16px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .status-segment {
+    margin-bottom: 16px;
+    
+    ion-segment-button {
+      --color: #666;
+      --color-checked: var(--ion-color-primary);
+      --indicator-color: var(--ion-color-primary);
+      --indicator-height: 3px;
+      
+      ion-label {
+        font-size: 14px;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .additional-filters {
+    padding: 0;
+    
+    ion-col {
+      padding: 4px;
+    }
+    
+    ion-item {
+      --border-radius: 8px;
+      --background: #f8f9fa;
+      --inner-padding-end: 12px;
+      --inner-padding-start: 12px;
+      --min-height: 44px;
+      margin-bottom: 8px;
+      
+      ion-select {
+        font-size: 14px;
+        
+        &::part(icon) {
+          color: var(--ion-color-primary);
+        }
+      }
+    }
+  }
+}
+
+// Contenedor de tareas
+.tasks-container {
+  padding: 0 16px 100px 16px; // Espacio para el FAB
+}
+
+// Estado vacío
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  
+  ion-icon {
+    color: #ccc;
+    margin-bottom: 16px;
+  }
+  
+  h3 {
+    margin: 16px 0 8px 0;
+    color: #333;
+    font-weight: 600;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+}
+
+// Tarjetas de tareas
+.task-card {
+  margin: var(--task-card-margin) 0;
+  border-radius: var(--task-card-border-radius);
+  box-shadow: var(--task-card-shadow);
+  border: none;
+  transition: all var(--animation-duration) ease;
+  position: relative;
+  overflow: hidden;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  // Tarea completada
+  &.completed {
+    opacity: 0.8;
+    background: #f8f9fa;
+    
+    .task-title {
+      text-decoration: line-through;
+      color: #666;
+    }
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--ion-color-success);
+    }
+  }
+  
+  // Tarea vencida
+  &.overdue {
+    border-left: 4px solid var(--ion-color-danger);
+    
+    .task-card-header {
+      background: rgba(var(--ion-color-danger-rgb), 0.05);
+    }
+  }
+  
+  ion-card-header {
+    padding: var(--task-card-padding);
+    padding-bottom: 8px;
+  }
+  
+  ion-card-content {
+    padding: 0 var(--task-card-padding) var(--task-card-padding);
+  }
+}
+
+// Header de la tarea
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  
+  .task-main-info {
+    flex: 1;
+  }
+  
+  .task-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+// Título de la tarea
+.task-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+// Meta información de la tarea
+.task-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+  
+  .status-chip,
+  .priority-chip {
+    font-size: 12px;
+    height: 28px;
+    
+    ion-icon {
+      font-size: 14px;
+      margin-right: 4px;
+    }
+    
+    ion-label {
+      font-weight: 500;
+    }
+  }
+}
+
+// Checkbox de la tarea
+.task-checkbox {
+  --size: 24px;
+  --checkbox-background-checked: var(--ion-color-success);
+  --border-color-checked: var(--ion-color-success);
+  --checkmark-color: white;
+  --border-radius: 6px;
+  --border-width: 2px;
+}
+
+// Descripción de la tarea
+.task-description {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 16px 0;
+  
+  // Limitar a 2 líneas
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// Información de ubicación
+.location-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px;
+  background: rgba(var(--ion-color-primary-rgb), 0.05);
+  border-radius: 8px;
+  
+  ion-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  
+  .location-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    
+    .location-name {
+      font-weight: 500;
+      color: #333;
+      font-size: 14px;
+    }
+    
+    .location-address {
+      color: #666;
+      font-size: 12px;
+    }
+  }
+  
+  ion-badge {
+    font-size: 11px;
+    font-weight: 600;
+  }
+}
+
+// Información de fecha
+.date-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  
+  ion-icon {
+    font-size: 16px;
+  }
+  
+  .due-date {
+    font-size: 14px;
+    color: #666;
+    
+    &.overdue-text {
+      color: var(--ion-color-danger);
+      font-weight: 500;
+    }
+  }
+}
+
+// Información de categoría
+.category-info {
+  margin-bottom: 16px;
+  
+  ion-chip {
+    height: 26px;
+    font-size: 12px;
+    
+    ion-label {
+      font-weight: 500;
+    }
+  }
+}
+
+// Botones de acción
+.action-buttons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+  margin-top: 16px;
+  
+  ion-button {
+    --color: #666;
+    font-size: 13px;
+    font-weight: 500;
+    
+    &:hover {
+      --color: var(--ion-color-primary);
+    }
+    
+    ion-icon {
+      font-size: 16px;
+    }
+  }
+}
+
+// Floating Action Button
+ion-fab {
+  ion-fab-button {
+    --background: var(--ion-color-secondary);
+    --color: white;
+    --box-shadow: 0 4px 20px rgba(var(--ion-color-secondary-rgb), 0.4);
+    --border-radius: 16px;
+    
+    &:hover {
+      --box-shadow: 0 6px 25px rgba(var(--ion-color-secondary-rgb), 0.6);
+      transform: translateY(-2px);
+    }
+    
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .task-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    
+    .task-actions {
+      align-self: flex-end;
+    }
+  }
+  
+  .action-buttons {
+    ion-button {
+      flex: 1;
+      justify-content: center;
+      
+      &:not(:last-child) {
+        margin-right: 4px;
+      }
+    }
+  }
+}
+
+// Progress bar personalizado
+ion-progress-bar {
+  --background: rgba(var(--ion-color-primary-rgb), 0.1);
+  --progress-background: var(--ion-color-primary);
+  height: 3px;
+}
+
+// Animaciones
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.task-card {
+  animation: slideInUp 0.3s ease-out;
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  ion-content {
+    --background: #1a1a1a;
+  }
+  
+  .search-container {
+    background: var(--ion-color-primary);
+    
+    ion-searchbar {
+      --background: rgba(30, 30, 30, 0.9);
+      --color: #ffffff;
+      --placeholder-color: #cccccc;
+    }
+  }
+  
+  .filters-container {
+    background: #2a2a2a;
+    
+    .additional-filters {
+      ion-item {
+        --background: #333333;
+        --color: #ffffff;
+      }
+    }
+  }
+  
+  .task-card {
+    background: #2a2a2a;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    
+    &.completed {
+      background: #333333;
+    }
+    
+    .task-title {
+      color: #ffffff;
+    }
+    
+    .task-description {
+      color: #cccccc;
+    }
+    
+    .location-info {
+      background: rgba(var(--ion-color-primary-rgb), 0.15);
+      
+      .location-name {
+        color: #ffffff;
+      }
+      
+      .location-address {
+        color: #cccccc;
+      }
+    }
+    
+    .due-date {
+      color: #cccccc;
+    }
+    
+    .action-buttons {
+      border-top-color: #444;
+      
+      ion-button {
+        --color: #cccccc;
+        
+        &:hover {
+          --color: var(--ion-color-primary);
+        }
+      }
+    }
+  }
+  
+  .empty-state {
+    color: #cccccc;
+    
+    h3 {
+      color: #ffffff;
+    }
+    
+    ion-icon {
+      color: #666666;
+    }
+  }
+}
+
+// Mejoras adicionales de accesibilidad
+.task-card {
+  &:focus-within {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+  }
+}
+
+// Animación del FAB
+ion-fab-button {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// Mejoras para pantallas pequeñas
+@media (max-width: 480px) {
+  .search-container {
+    padding: 12px;
+  }
+  
+  .filters-container {
+    padding: 12px;
+  }
+  
+  .tasks-container {
+    padding: 0 12px 100px 12px;
+  }
+  
+  .task-card {
+    margin: 8px 0;
+    
+    ion-card-header,
+    ion-card-content {
+      padding: 12px;
+    }
+    
+    ion-card-content {
+      padding-top: 0;
+    }
+  }
+  
+  .task-title {
+    font-size: 16px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 8px;
+    
+    ion-button {
+      justify-content: flex-start;
+      margin: 0;
+    }
+  }
+}
+
+// Estados de hover mejorados para desktop
+@media (hover: hover) {
+  .task-card {
+    cursor: pointer;
+    
+    &:hover {
+      .task-title {
+        color: var(--ion-color-primary);
+      }
+    }
+  }
+  
+  .task-checkbox {
+    cursor: pointer;
+    
+    &:hover {
+      --checkbox-background: rgba(var(--ion-color-success-rgb), 0.1);
+    }
+  }
+}

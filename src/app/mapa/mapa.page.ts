@@ -14,53 +14,55 @@ import { Geolocation } from '@capacitor/geolocation';
 })
 export class MapaPage implements OnInit {
 
+ 
   constructor() { }
 
-  ngOnInit() {
+  ngOnInit() {}
+
+  async ngAfterViewInit() {
+    await this.getCurrentPosition();
   }
 
- async ngAfterViewInit(){
-  await this.getCurrentPosition();
- }
- cargarMapa( longitud: number, latitud: number) {
-  const map = new mapboxgl.Map({
-    accessToken:
-    'pk.eyJ1IjoidGhvbWFza2x6IiwiYSI6ImNsM3VibWJwbTI4emkzZXBlamVjOHp0Z2YifQ.QhFxYxdIC2m4vGlEkMqrow', // reemplaza con
-    // tu clave de API de mapbox
-    container: 'map', // container ID
-    style: 'mapbox://styles/mapbox/streets-v11', // style URL
-    center: [longitud,latitud], // starting position [lng, lat]
-    zoom: 9, // starting zoom
-   });
-   // maximisar mapa
-   map.on('load', function() {
-   map.resize();
-   });
-  // controles de navegacion 
-  map.addControl(new mapboxgl.NavigationControl());
-  map.addControl(new mapboxgl.FullscreenControl());
-  //ubicacion actual
-  map.addControl(new mapboxgl.GeolocateControl({
-  positionOptions: {
-  enableHighAccuracy: true
-},
-trackUserLocation: true
-}));
-//diseño del marcador
-var el = document.createElement('div');
-el.className = 'marker';
-el.style.backgroundImage = 'url(../../assets/icon/placeholder.png)'; // reemplaza con la ruta de tu imagen
-el.style.width = '32px';
-el.style.height = '32px';
+  cargarMapa(longitud: number, latitud: number) {
+    const map = new mapboxgl.Map({
+      accessToken: 'your-mapbox-access-token', // Reemplaza con tu clave de acceso de Mapbox
+      container: 'map',  // El contenedor del mapa en tu HTML
+      style: 'mapbox://styles/mapbox/streets-v11',  // Estilo del mapa
+      center: [longitud, latitud],  // Coordenadas para centrar el mapa
+      zoom: 9,  // Nivel de zoom
+    });
 
-const marker = new mapboxgl.Marker(el)
-.setLngLat([longitud, latitud])
-.addTo(map);
- }
- async getCurrentPosition() {
-  const coordinates = await Geolocation.getCurrentPosition();
-this.cargarMapa( coordinates.coords.longitude,coordinates.coords.latitude);
-  console.log('Current position:', coordinates);
-}
+    map.on('load', () => {
+      map.resize();
+    });
 
+    // Controles de navegación
+    map.addControl(new mapboxgl.NavigationControl());
+    map.addControl(new mapboxgl.FullscreenControl());
+
+    // Geolocalización
+    map.addControl(new mapboxgl.GeolocateControl({
+      positionOptions: {
+        enableHighAccuracy: true
+      },
+      trackUserLocation: true
+    }));
+
+    // Marcador personalizado
+    const el = document.createElement('div');
+    el.className = 'marker';
+    el.style.backgroundImage = 'url(../../assets/icon/placeholder.png)';
+    el.style.width = '32px';
+    el.style.height = '32px';
+
+    new mapboxgl.Marker(el)
+      .setLngLat([longitud, latitud])
+      .addTo(map);
+  }
+
+  async getCurrentPosition() {
+    const coordinates = await Geolocation.getCurrentPosition();
+    this.cargarMapa(coordinates.coords.longitude, coordinates.coords.latitude);
+    console.log('Ubicación actual:', coordinates);
+  }
 }
