@@ -4,19 +4,19 @@ import { FormsModule } from '@angular/forms';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonItem,
   IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonDatetime,
-  IonModal, IonButtons, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
+ IonButtons, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
   IonCardTitle, IonCardContent, IonChip, IonToast, IonSearchbar, IonList,
-  IonCheckbox, ModalController, IonSpinner
+ ModalController, IonSpinner
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   close, checkmarkOutline, locationOutline, timeOutline,
   alertCircleOutline, documentTextOutline, pricetagOutline,
-  flagOutline, mapOutline, saveOutline, addOutline
+  flagOutline, mapOutline, saveOutline, addOutline, refreshOutline
 } from 'ionicons/icons';
 import { LocationService, Location } from '../services/location.service';
 import { TaskService } from '../services/task.service';
-import { CategoriasService, Category } from '../services/categorias.service'; // Importar el servicio de categorías
+import { CategoriasService, Category } from '../services/categorias.service';
 import { Task } from '../interface/Itask.interface';
 
 @Component({
@@ -26,15 +26,15 @@ import { Task } from '../interface/Itask.interface';
   imports: [
     CommonModule, FormsModule,
     IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonItem,
-    IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonDatetime,
-    IonModal, IonButtons, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
+    IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonDatetime, IonButtons, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
     IonCardTitle, IonCardContent, IonChip, IonToast, IonSearchbar, IonList, 
-    IonCheckbox, IonSpinner
+     IonSpinner
   ]
 })
 export class ModalComponent implements OnInit {
   @Input() task?: Task;
   @Input() isEditing: boolean = false;
+  @Input() selectedDate?: string; // Nueva propiedad para recibir la fecha seleccionada
 
   minDate = new Date().toISOString();
   modalTitle = 'Nueva Tarea';
@@ -64,9 +64,9 @@ export class ModalComponent implements OnInit {
   categoriesError = false;
   
   priorities = [
-    { value: 'low', label: 'Baja', color: 'danger' },
+    { value: 'low', label: 'Baja', color: 'success' },
     { value: 'medium', label: 'Media', color: 'warning' },
-    { value: 'high', label: 'Alta', color: 'success' }
+    { value: 'high', label: 'Alta', color: 'danger' }
   ];
 
   isFormValid = false;
@@ -83,16 +83,21 @@ export class ModalComponent implements OnInit {
     private modalController: ModalController,
     private locationService: LocationService,
     private taskService: TaskService,
-    private categoriasService: CategoriasService // Inyectar el servicio
+    private categoriasService: CategoriasService
   ) {
     addIcons({
       close, checkmarkOutline, locationOutline, timeOutline,
       alertCircleOutline, documentTextOutline, pricetagOutline,
-      flagOutline, mapOutline, saveOutline, addOutline
+      flagOutline, mapOutline, saveOutline, addOutline, refreshOutline
     });
   }
 
   ngOnInit() {
+    // Si se pasa una fecha seleccionada, usarla como fecha por defecto
+    if (this.selectedDate) {
+      this.taskForm.dueDate = this.selectedDate + 'T12:00:00.000Z';
+    }
+    
     if (this.isEditing && this.task) {
       this.modalTitle = 'Editar Tarea';
       this.buttonText = 'Guardar Cambios';
@@ -101,7 +106,7 @@ export class ModalComponent implements OnInit {
     }
     this.validateForm();
     this.fetchLocations();
-    this.fetchCategories(); // Cargar categorías desde la API
+    this.fetchCategories();
   }
 
   private loadTaskData() {
@@ -111,7 +116,7 @@ export class ModalComponent implements OnInit {
         description: this.task.description,
         priority: this.task.priority,
         category_id: this.task.category_id || undefined,
-        dueDate: this.task.date,
+        dueDate: this.task.date + 'T12:00:00.000Z', // Convertir fecha a formato datetime
         location_id: this.task.location_id || undefined
       };
       

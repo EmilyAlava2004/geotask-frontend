@@ -1,27 +1,397 @@
-#container {
-  text-align: center;
+// Estilos para las estadísticas
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
 
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  .stat-card {
+    margin: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+
+    ion-card-content {
+      padding: 12px;
+    }
+
+    .stat-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      ion-icon {
+        font-size: 24px;
+        min-width: 24px;
+      }
+
+      div {
+        flex: 1;
+        text-align: left;
+
+        h3 {
+          margin: 0;
+          font-size: 1.2rem;
+          font-weight: bold;
+          color: var(--ion-color-dark);
+        }
+
+        p {
+          margin: 0;
+          font-size: 0.8rem;
+          color: var(--ion-color-medium);
+        }
+      }
+    }
+  }
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+// Estilos del calendario
+.calendar-card {
+  margin: 0 0 16px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+
+  .calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    .month-year {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--ion-color-primary);
+    }
+
+    ion-button {
+      --padding-start: 8px;
+      --padding-end: 8px;
+    }
+  }
+
+  ion-card-content {
+    padding: 16px;
+  }
+
+  .calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 8px;
+
+    .weekday {
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ion-color-medium);
+      padding: 8px 0;
+    }
+  }
+
+  .calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+
+    .calendar-day {
+      position: relative;
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 4px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 50px;
+
+      .day-number {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--ion-color-dark);
+      }
+
+      .task-indicators {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px;
+        margin-top: 2px;
+        align-items: center;
+        justify-content: center;
+
+        .task-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          
+          &.priority-high {
+            background-color: var(--ion-color-danger);
+          }
+          
+          &.priority-medium {
+            background-color: var(--ion-color-warning);
+          }
+          
+          &.priority-low {
+            background-color: var(--ion-color-success);
+          }
+        }
+
+        .task-count {
+          font-size: 0.6rem;
+          color: var(--ion-color-medium);
+          margin-left: 2px;
+        }
+      }
+
+      &.other-month {
+        .day-number {
+          color: var(--ion-color-light);
+        }
+      }
+
+      &.today {
+        background-color: var(--ion-color-primary-tint);
+        
+        .day-number {
+          color: var(--ion-color-primary);
+          font-weight: bold;
+        }
+      }
+
+      &.selected {
+        background-color: var(--ion-color-primary);
+        
+        .day-number {
+          color: white;
+          font-weight: bold;
+        }
+
+        .task-indicators .task-count {
+          color: rgba(255, 255, 255, 0.8);
+        }
+      }
+
+      &.has-tasks {
+        background-color: var(--ion-color-light);
+      }
+
+      &:hover {
+        background-color: var(--ion-color-primary-tint);
+        transform: scale(1.05);
+      }
+    }
+  }
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
+// Estilos para las tareas del día
+.tasks-card {
+  margin: 0 0 16px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
 
-  color: #8c8c8c;
+  .task-item {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --inner-padding-end: 8px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    background-color: var(--ion-color-light);
 
-  margin: 0;
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    ion-label {
+      h3 {
+        margin: 0 0 4px 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+
+        &.completed {
+          text-decoration: line-through;
+          color: var(--ion-color-medium);
+        }
+      }
+
+      p {
+        margin: 2px 0;
+        font-size: 0.8rem;
+        color: var(--ion-color-medium);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        ion-icon {
+          font-size: 14px;
+        }
+      }
+    }
+
+    ion-chip {
+      --background: var(--ion-color-primary-tint);
+      --color: var(--ion-color-primary);
+      font-size: 0.7rem;
+      font-weight: 600;
+      height: 24px;
+    }
+
+    ion-button {
+      --padding-start: 8px;
+      --padding-end: 8px;
+      margin-left: 8px;
+    }
+  }
 }
 
-#container a {
-  text-decoration: none;
+// Estilos para el mensaje sin tareas
+.no-tasks-card {
+  margin: 0 0 16px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+
+  ion-card-content {
+    text-align: center;
+    padding: 32px 16px;
+
+    &.text-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    ion-icon {
+      opacity: 0.5;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: var(--ion-color-medium);
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--ion-color-medium);
+    }
+
+    ion-button {
+      margin-top: 8px;
+      --border-radius: 12px;
+    }
+  }
+}
+
+// Estilos para el botón flotante
+ion-fab {
+  ion-fab-button {
+    --background: var(--ion-color-primary);
+    --color: white;
+    --border-radius: 50%;
+    --box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.4);
+
+    &:hover {
+      --box-shadow: 0 6px 20px rgba(var(--ion-color-primary-rgb), 0.6);
+      transform: scale(1.1);
+    }
+  }
+}
+
+// Responsive para tablets
+@media (min-width: 768px) {
+  .stats-container {
+    max-width: 600px;
+    margin: 0 auto 16px auto;
+  }
+
+  .calendar-card {
+    max-width: 600px;
+    margin: 0 auto 16px auto;
+  }
+
+  .calendar-days {
+    .calendar-day {
+      min-height: 60px;
+      padding: 8px;
+
+      .day-number {
+        font-size: 1rem;
+      }
+
+      .task-indicators {
+        .task-dot {
+          width: 8px;
+          height: 8px;
+        }
+      }
+    }
+  }
+
+  .tasks-card,
+  .no-tasks-card {
+    max-width: 600px;
+    margin: 0 auto 16px auto;
+  }
+}
+
+// Animaciones
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calendar-card,
+.tasks-card,
+.no-tasks-card {
+  animation: slideIn 0.3s ease-out;
+}
+
+// Estados de hover para mejor UX
+.task-item:hover {
+  background-color: var(--ion-color-primary-tint);
+  transition: background-color 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+// Estilos para modo oscuro
+@media (prefers-color-scheme: dark) {
+  .calendar-card,
+  .tasks-card,
+  .no-tasks-card,
+  .stat-card {
+    background-color: var(--ion-color-dark-tint);
+    border: 1px solid var(--ion-color-medium-tint);
+  }
+
+  .calendar-day {
+    &.has-tasks {
+      background-color: var(--ion-color-dark-shade);
+    }
+    
+    &:hover {
+      background-color: var(--ion-color-primary-shade);
+    }
+  }
+
+  .task-item {
+    background-color: var(--ion-color-dark-shade);
+    
+    &:hover {
+      background-color: var(--ion-color-primary-shade);
+    }
+  }
 }

@@ -80,7 +80,7 @@ interface TaskDisplay {
   templateUrl: './tareas.page.html',
   styleUrls: ['./tareas.page.scss'],
   standalone: true,
-  imports: [IonButtons, IonApp, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, 
+  imports: [IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, 
     IonSearchbar,
     IonSegment,
     IonSegmentButton,
@@ -96,7 +96,6 @@ interface TaskDisplay {
     IonFab,
     IonFabButton,
     IonItem,
-    IonList,
     IonRefresher,
     IonRefresherContent,
     IonGrid,
@@ -105,9 +104,7 @@ interface TaskDisplay {
     IonCheckbox,
     IonSelect,
     IonSelectOption,
-    IonText,
     IonProgressBar, 
-    IonMenu, 
     IonMenuButton
   ]
 })
