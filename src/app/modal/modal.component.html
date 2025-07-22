@@ -38,7 +38,7 @@
             (ionInput)="onFormChange()"
             placeholder="Describe la tarea en detalle"
             rows="3"
-            maxlength="500">
+            maxlength="250">
           </ion-textarea>
         </ion-item>
       </ion-card-content>
@@ -59,11 +59,11 @@
               <ion-item>
                 <ion-label position="stacked">Categoría *</ion-label>
                 <ion-select 
-                  [(ngModel)]="taskForm.category"
+                  [(ngModel)]="taskForm.category_id"
                   (ionChange)="onFormChange()"
                   placeholder="Selecciona">
-                  <ion-select-option *ngFor="let category of categories" [value]="category">
-                    {{category}}
+                  <ion-select-option *ngFor="let category of categories" [value]="category.id">
+                    {{category.name}}
                   </ion-select-option>
                 </ion-select>
               </ion-item>
@@ -83,11 +83,16 @@
           </ion-row>
         </ion-grid>
 
-        <!-- Vista previa de prioridad -->
-        <div class="priority-preview">
+        <!-- Vista previa -->
+        <div class="preview-section">
           <ion-chip [color]="getPriorityColor(taskForm.priority)">
             <ion-icon name="flag-outline"></ion-icon>
             <ion-label>{{getPriorityLabel(taskForm.priority)}}</ion-label>
+          </ion-chip>
+          
+          <ion-chip color="primary">
+            <ion-icon name="pricetag-outline"></ion-icon>
+            <ion-label>{{getCategoryName(taskForm.category_id)}}</ion-label>
           </ion-chip>
         </div>
       </ion-card-content>
@@ -98,16 +103,15 @@
       <ion-card-header>
         <ion-card-title>
           <ion-icon name="location-outline"></ion-icon>
-          Ubicación
+          Ubicación (Opcional)
         </ion-card-title>
       </ion-card-header>
       <ion-card-content>
         <ion-item>
-          <ion-label position="stacked">Ubicación *</ion-label>
+          <ion-label position="stacked">Ubicación</ion-label>
           <ion-input 
-            [(ngModel)]="taskForm.location.name"
-            (ionInput)="onFormChange()"
-            placeholder="Nombre del lugar"
+            [value]="selectedLocation?.name || 'Sin ubicación'"
+            placeholder="Selecciona una ubicación"
             readonly>
           </ion-input>
           <ion-button 
@@ -118,9 +122,9 @@
           </ion-button>
         </ion-item>
 
-        <ion-item *ngIf="taskForm.location.address">
+        <ion-item *ngIf="selectedLocation?.address">
           <ion-label>
-            <p>{{taskForm.location.address}}</p>
+            <p>{{selectedLocation?.address}}</p>
           </ion-label>
         </ion-item>
 
@@ -143,6 +147,14 @@
               </ion-label>
             </ion-item>
           </ion-list>
+
+          <ion-item *ngIf="locationResults.length === 0 && !isSearchingLocation" button (click)="selectLocation({name: 'Sin ubicación', address: '', latitude: 0, longitude: 0})">
+            <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Sin ubicación</h3>
+              <p>No asignar ubicación a esta tarea</p>
+            </ion-label>
+          </ion-item>
         </div>
       </ion-card-content>
     </ion-card>
@@ -198,6 +210,6 @@
   [message]="toastMessage"
   duration="3000"
   position="top"
-  color="danger"
+  [color]="showToast ? 'danger' : 'success'"
   (didDismiss)="onToastDidDismiss()">
 </ion-toast>

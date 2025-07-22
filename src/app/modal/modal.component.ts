@@ -1,107 +1,40 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { 
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonButton,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonInput,
-  IonTextarea,
-  IonSelect,
-  IonSelectOption,
-  IonDatetime,
-  IonModal,
-  IonButtons,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
-  IonChip,
-  IonToast,
-  IonSearchbar,
-  IonList,
-  IonCheckbox,
-  ModalController
+import {
+  IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonItem,
+  IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonDatetime,
+  IonModal, IonButtons, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
+  IonCardTitle, IonCardContent, IonChip, IonToast, IonSearchbar, IonList,
+  IonCheckbox, ModalController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { 
-  close,
-  checkmarkOutline,
-  locationOutline,
-  timeOutline,
-  alertCircleOutline,
-  documentTextOutline,
-  pricetagOutline,
-  flagOutline,
-  mapOutline,
-  saveOutline
+import {
+  close, checkmarkOutline, locationOutline, timeOutline,
+  alertCircleOutline, documentTextOutline, pricetagOutline,
+  flagOutline, mapOutline, saveOutline
 } from 'ionicons/icons';
+import { LocationService, Location } from '../services/location.service';
+import { TaskService } from '../services/task.service';
+import { Task } from '../interface/Itask.interface'; // Importar desde la interfaz correcta
 
-export interface Task {
-  id: string;
-  title: string;
-  description: string;
-  status: 'pending' | 'in-progress' | 'completed';
-  priority: 'low' | 'medium' | 'high';
-  category: string;
-  location: {
-    name: string;
-    address: string;
-    latitude: number;
-    longitude: number;
-  };
-  dueDate: Date;
-  createdAt: Date;
-  distance?: number;
-}
+// Eliminar la definición duplicada de Task interface ya que se importa
 
 @Component({
   selector: 'app-modal',
   templateUrl: './modal.component.html',
   styleUrls: ['./modal.component.scss'],
   imports: [
-    CommonModule,
-    FormsModule,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonContent,
-    IonButton,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonInput,
-    IonTextarea,
-    IonSelect,
-    IonSelectOption,
-    IonDatetime,
-    IonModal,
-    IonButtons,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
-    IonChip,
-    IonToast,
-    IonSearchbar,
-    IonList,
-    IonCheckbox
+    CommonModule, FormsModule,
+    IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonItem,
+    IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonDatetime,
+    IonModal, IonButtons, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
+    IonCardTitle, IonCardContent, IonChip, IonToast, IonSearchbar, IonList, IonCheckbox
   ]
 })
 export class ModalComponent implements OnInit {
-  @Input() task?: Task; // Para editar tareas existentes
-  @Input() isEditing: boolean = false; // Para saber si estamos editando
+  @Input() task?: Task;
+  @Input() isEditing: boolean = false;
 
   minDate = new Date().toISOString();
   modalTitle = 'Nueva Tarea';
@@ -109,82 +42,54 @@ export class ModalComponent implements OnInit {
   buttonIcon = 'checkmark-outline';
 
   // Formulario de tarea
-  taskForm = {
+  taskForm: {
+    title: string;
+    description: string;
+    priority: 'low' | 'medium' | 'high';
+    category_id: number | undefined;
+    dueDate: string;
+    location_id: number | undefined;
+  } = {
     title: '',
     description: '',
     priority: 'medium',
-    category: '',
+    category_id: undefined,
     dueDate: new Date().toISOString(),
-    location: {
-      name: '',
-      address: '',
-      latitude: 0,
-      longitude: 0
-    }
+    location_id: undefined
   };
 
-  // Opciones disponibles
-  categories = ['Trabajo', 'Personal', 'Urgente', 'Mantenimiento'];
+  // Opciones predefinidas (deberías cargarlas desde tu API de categorías)
+  categories = [
+    { id: 1, name: 'Trabajo' },
+    { id: 2, name: 'Personal' },
+    { id: 3, name: 'Urgente' },
+    { id: 4, name: 'Mantenimiento' }
+  ];
+  
   priorities = [
     { value: 'low', label: 'Baja', color: 'success' },
     { value: 'medium', label: 'Media', color: 'warning' },
     { value: 'high', label: 'Alta', color: 'danger' }
   ];
 
-  // Estados del componente
   isFormValid = false;
   showToast = false;
   toastMessage = '';
   isSearchingLocation = false;
-  locationResults: any[] = [];
+  locationResults: Location[] = [];
+  availableLocations: Location[] = [];
   showLocationSearch = false;
+  selectedLocation: Location | null = null;
 
-  // Ubicaciones predefinidas para el ejemplo
-  predefinedLocations = [
-    {
-      name: 'Oficina Central',
-      address: 'Av. Principal 123, San José',
-      latitude: 9.9281,
-      longitude: -84.0907
-    },
-    {
-      name: 'Ferretería El Martillo',
-      address: 'Calle 5, Heredia',
-      latitude: 9.9988,
-      longitude: -84.1175
-    },
-    {
-      name: 'Centro Comercial',
-      address: 'Mall San Pedro, San José',
-      latitude: 9.9349,
-      longitude: -84.0528
-    },
-    {
-      name: 'Universidad Nacional',
-      address: 'Heredia Centro',
-      latitude: 9.9988,
-      longitude: -84.1175
-    },
-    {
-      name: 'Hospital San Juan de Dios',
-      address: 'San José Centro',
-      latitude: 9.9326,
-      longitude: -84.0787
-    }
-  ];
-
-  constructor(private modalController: ModalController) {
+  constructor(
+    private modalController: ModalController,
+    private locationService: LocationService,
+    private taskService: TaskService
+  ) {
     addIcons({
-      close,
-      checkmarkOutline,
-      locationOutline,
-      timeOutline,
-      alertCircleOutline,
-      documentTextOutline,
-      pricetagOutline,
-      flagOutline,
-      mapOutline,
-      saveOutline
+      close, checkmarkOutline, locationOutline, timeOutline,
+      alertCircleOutline, documentTextOutline, pricetagOutline,
+      flagOutline, mapOutline, saveOutline
     });
   }
 
@@ -196,6 +101,7 @@ export class ModalComponent implements OnInit {
       this.loadTaskData();
     }
     this.validateForm();
+    this.fetchLocations();
   }
 
   private loadTaskData() {
@@ -204,34 +110,49 @@ export class ModalComponent implements OnInit {
         title: this.task.title,
         description: this.task.description,
         priority: this.task.priority,
-        category: this.task.category,
-        dueDate: this.task.dueDate.toISOString(),
-        location: { ...this.task.location }
+        category_id: this.task.category_id || undefined,
+        dueDate: this.task.date,
+        location_id: this.task.location_id || undefined
       };
+      
+      // Cargar la ubicación seleccionada si existe
+      if (this.task.Location) {
+        this.selectedLocation = this.task.Location;
+      }
     }
   }
 
   validateForm() {
-    this.isFormValid = 
+    this.isFormValid =
       this.taskForm.title.trim().length > 0 &&
       this.taskForm.description.trim().length > 0 &&
-      this.taskForm.category.length > 0 &&
-      this.taskForm.location.name.length > 0;
+      this.taskForm.category_id !== undefined;
+    // Nota: ubicación no es obligatoria según tu modelo
   }
 
   onFormChange() {
     this.validateForm();
   }
 
+  fetchLocations() {
+    this.locationService.getLocations().subscribe({
+      next: (locations) => {
+        this.availableLocations = locations;
+      },
+      error: (err) => {
+        console.error('Error al obtener ubicaciones:', err);
+      }
+    });
+  }
+
   onLocationSearch(event: any) {
     const query = event.detail.value.toLowerCase();
     if (query.length > 2) {
       this.isSearchingLocation = true;
-      // Simular búsqueda de ubicaciones
       setTimeout(() => {
-        this.locationResults = this.predefinedLocations.filter(location =>
-          location.name.toLowerCase().includes(query) ||
-          location.address.toLowerCase().includes(query)
+        this.locationResults = this.availableLocations.filter(location =>
+          (location.name?.toLowerCase().includes(query) ?? false) ||
+          (location.address?.toLowerCase().includes(query) ?? false)
         );
         this.isSearchingLocation = false;
       }, 500);
@@ -240,8 +161,9 @@ export class ModalComponent implements OnInit {
     }
   }
 
-  selectLocation(location: any) {
-    this.taskForm.location = { ...location };
+  selectLocation(location: Location) {
+    this.selectedLocation = { ...location };
+    this.taskForm.location_id = location.id || undefined;
     this.showLocationSearch = false;
     this.locationResults = [];
     this.validateForm();
@@ -249,11 +171,7 @@ export class ModalComponent implements OnInit {
 
   toggleLocationSearch() {
     this.showLocationSearch = !this.showLocationSearch;
-    if (this.showLocationSearch) {
-      this.locationResults = [...this.predefinedLocations];
-    } else {
-      this.locationResults = [];
-    }
+    this.locationResults = this.showLocationSearch ? [...this.availableLocations] : [];
   }
 
   getPriorityColor(priority: string): string {
@@ -266,27 +184,44 @@ export class ModalComponent implements OnInit {
     return p ? p.label : 'Sin definir';
   }
 
+  getCategoryName(categoryId: number | undefined): string {
+    if (!categoryId) return 'Sin categoría';
+    const category = this.categories.find(c => c.id === categoryId);
+    return category ? category.name : 'Sin categoría';
+  }
+
   async createTask() {
     if (!this.isFormValid) {
       this.showToastMessage('Por favor completa todos los campos requeridos');
       return;
     }
 
-    const taskData: Task = {
-      id: this.isEditing && this.task ? this.task.id : Date.now().toString(),
-      title: this.taskForm.title,
-      description: this.taskForm.description,
-      status: this.isEditing && this.task ? this.task.status : 'pending',
-      priority: this.taskForm.priority as 'low' | 'medium' | 'high',
-      category: this.taskForm.category,
-      location: this.taskForm.location,
-      dueDate: new Date(this.taskForm.dueDate),
-      createdAt: this.isEditing && this.task ? this.task.createdAt : new Date(),
-      distance: this.isEditing && this.task ? this.task.distance : Math.random() * 10
-    };
+    try {
+      const taskPayload: Task = {
+        title: this.taskForm.title,
+        description: this.taskForm.description,
+        date: this.taskForm.dueDate.split('T')[0], // Solo la fecha
+        status: this.isEditing && this.task ? this.task.status : 'pending',
+        priority: this.taskForm.priority,
+        user_id: 1, // Asegúrate de usar el ID del usuario actual
+        category_id: this.taskForm.category_id,
+        location_id: this.taskForm.location_id
+      };
 
-    // Cerrar modal y enviar la tarea
-    await this.modalController.dismiss(taskData);
+      if (this.isEditing && this.task?.id) {
+        // Actualizar tarea existente
+        await this.taskService.updateTask(this.task.id, taskPayload).toPromise();
+        await this.modalController.dismiss({ action: 'updated', task: taskPayload });
+      } else {
+        // Crear nueva tarea
+        const createdTask = await this.taskService.createTask(taskPayload).toPromise();
+        await this.modalController.dismiss({ action: 'created', task: createdTask });
+      }
+      
+    } catch (error) {
+      console.error('Error al guardar la tarea:', error);
+      this.showToastMessage('Error al guardar la tarea. Intenta nuevamente.');
+    }
   }
 
   async cancel() {
