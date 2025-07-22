@@ -212,8 +212,10 @@ export class TareasPage implements OnInit {
 
   filterTasks() {
     this.filteredTasks = this.tasks.filter(task => {
-      const matchesSearch = task.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                           task.description.toLowerCase().includes(this.searchTerm.toLowerCase());
+      const matchesSearch = 
+  (task.title?.toLowerCase() ?? '').includes(this.searchTerm?.toLowerCase() ?? '') ||
+  (task.description?.toLowerCase() ?? '').includes(this.searchTerm?.toLowerCase() ?? '');
+;
       
       const matchesStatus = this.selectedSegment === 'all' || task.status === this.selectedSegment;
       
@@ -350,13 +352,19 @@ export class TareasPage implements OnInit {
     }
   }
 
-  formatDate(date: Date): string {
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  }
+  formatDate(date: string | Date | undefined | null): string {
+  if (!date) return 'Fecha no disponible';
+
+  const parsed = new Date(date);
+  if (isNaN(parsed.getTime())) return 'Fecha inválida';
+
+  return parsed.toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+}
+
 
   formatDistance(distance: number): string {
     if (distance < 1) {

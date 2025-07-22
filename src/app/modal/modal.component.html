@@ -58,14 +58,35 @@
             <ion-col size="6">
               <ion-item>
                 <ion-label position="stacked">Categoría *</ion-label>
+                
+                <!-- Loading spinner para categorías -->
+                <div *ngIf="isLoadingCategories" class="loading-container">
+                  <ion-spinner name="crescent"></ion-spinner>
+                  <ion-label>Cargando categorías...</ion-label>
+                </div>
+                
+                <!-- Select de categorías -->
                 <ion-select 
+                  *ngIf="!isLoadingCategories"
                   [(ngModel)]="taskForm.category_id"
                   (ionChange)="onFormChange()"
-                  placeholder="Selecciona">
-                  <ion-select-option *ngFor="let category of categories" [value]="category.id">
+                  placeholder="Selecciona una categoría">
+                  <ion-select-option 
+                    *ngFor="let category of categories" 
+                    [value]="category.id">
                     {{category.name}}
                   </ion-select-option>
                 </ion-select>
+                
+                <!-- Botón para recargar categorías en caso de error -->
+                <ion-button 
+                  *ngIf="categoriesError && !isLoadingCategories"
+                  fill="clear" 
+                  size="small"
+                  (click)="reloadCategories()">
+                  <ion-icon name="refresh-outline" slot="start"></ion-icon>
+                  Reintentar
+                </ion-button>
               </ion-item>
             </ion-col>
             <ion-col size="6">
@@ -83,15 +104,15 @@
           </ion-row>
         </ion-grid>
 
-        <!-- Vista previa -->
+        <!-- Vista previa mejorada -->
         <div class="preview-section">
           <ion-chip [color]="getPriorityColor(taskForm.priority)">
             <ion-icon name="flag-outline"></ion-icon>
             <ion-label>{{getPriorityLabel(taskForm.priority)}}</ion-label>
           </ion-chip>
           
-          <ion-chip color="primary">
-            <ion-icon name="pricetag-outline"></ion-icon>
+          <ion-chip [color]="getCategoryColor(taskForm.category_id)">
+            <ion-icon [name]="getCategoryIcon(taskForm.category_id)"></ion-icon>
             <ion-label>{{getCategoryName(taskForm.category_id)}}</ion-label>
           </ion-chip>
         </div>
@@ -204,12 +225,12 @@
 
 </ion-content>
 
-<!-- Toast para mensajes -->
+<!-- Toast para mensajes mejorado -->
 <ion-toast
   [isOpen]="showToast"
   [message]="toastMessage"
   duration="3000"
   position="top"
-  [color]="showToast ? 'danger' : 'success'"
+  [color]="toastColor"
   (didDismiss)="onToastDidDismiss()">
 </ion-toast>

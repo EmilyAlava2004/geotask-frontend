@@ -6,19 +6,18 @@ import {
   IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonDatetime,
   IonModal, IonButtons, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
   IonCardTitle, IonCardContent, IonChip, IonToast, IonSearchbar, IonList,
-  IonCheckbox, ModalController
+  IonCheckbox, ModalController, IonSpinner
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   close, checkmarkOutline, locationOutline, timeOutline,
   alertCircleOutline, documentTextOutline, pricetagOutline,
-  flagOutline, mapOutline, saveOutline
+  flagOutline, mapOutline, saveOutline, addOutline
 } from 'ionicons/icons';
 import { LocationService, Location } from '../services/location.service';
 import { TaskService } from '../services/task.service';
-import { Task } from '../interface/Itask.interface'; // Importar desde la interfaz correcta
-
-// Eliminar la definición duplicada de Task interface ya que se importa
+import { CategoriasService, Category } from '../services/categorias.service'; // Importar el servicio de categorías
+import { Task } from '../interface/Itask.interface';
 
 @Component({
   selector: 'app-modal',
@@ -29,7 +28,8 @@ import { Task } from '../interface/Itask.interface'; // Importar desde la interf
     IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonItem,
     IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonDatetime,
     IonModal, IonButtons, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
-    IonCardTitle, IonCardContent, IonChip, IonToast, IonSearchbar, IonList, IonCheckbox
+    IonCardTitle, IonCardContent, IonChip, IonToast, IonSearchbar, IonList, 
+    IonCheckbox, IonSpinner
   ]
 })
 export class ModalComponent implements OnInit {
@@ -58,13 +58,10 @@ export class ModalComponent implements OnInit {
     location_id: undefined
   };
 
-  // Opciones predefinidas (deberías cargarlas desde tu API de categorías)
-  categories = [
-    { id: 1, name: 'Trabajo' },
-    { id: 2, name: 'Personal' },
-    { id: 3, name: 'Urgente' },
-    { id: 4, name: 'Mantenimiento' }
-  ];
+  // Categorías cargadas desde la API
+  categories: Category[] = [];
+  isLoadingCategories = false;
+  categoriesError = false;
   
   priorities = [
     { value: 'low', label: 'Baja', color: 'success' },
@@ -75,6 +72,7 @@ export class ModalComponent implements OnInit {
   isFormValid = false;
   showToast = false;
   toastMessage = '';
+  toastColor: 'success' | 'danger' | 'warning' = 'danger';
   isSearchingLocation = false;
   locationResults: Location[] = [];
   availableLocations: Location[] = [];
@@ -84,12 +82,13 @@ export class ModalComponent implements OnInit {
   constructor(
     private modalController: ModalController,
     private locationService: LocationService,
-    private taskService: TaskService
+    private taskService: TaskService,
+    private categoriasService: CategoriasService // Inyectar el servicio
   ) {
     addIcons({
       close, checkmarkOutline, locationOutline, timeOutline,
       alertCircleOutline, documentTextOutline, pricetagOutline,
-      flagOutline, mapOutline, saveOutline
+      flagOutline, mapOutline, saveOutline, addOutline
     });
   }
 
@@ -102,6 +101,7 @@ export class ModalComponent implements OnInit {
     }
     this.validateForm();
     this.fetchLocations();
+    this.fetchCategories(); // Cargar categorías desde la API
   }
 
   private loadTaskData() {
@@ -127,11 +127,42 @@ export class ModalComponent implements OnInit {
       this.taskForm.title.trim().length > 0 &&
       this.taskForm.description.trim().length > 0 &&
       this.taskForm.category_id !== undefined;
-    // Nota: ubicación no es obligatoria según tu modelo
   }
 
   onFormChange() {
     this.validateForm();
+  }
+
+  // Método para cargar categorías desde la API
+  fetchCategories() {
+    this.isLoadingCategories = true;
+    this.categoriesError = false;
+    
+    this.categoriasService.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+        this.isLoadingCategories = false;
+      },
+      error: (error) => {
+        console.error('Error al obtener categorías:', error);
+        this.categoriesError = true;
+        this.isLoadingCategories = false;
+        this.showToastMessage('Error al cargar las categorías', 'warning');
+        
+        // Fallback a categorías predefinidas en caso de error
+        this.categories = [
+          { id: 1, name: 'Trabajo', icon: 'briefcase-outline', color: 'primary' },
+          { id: 2, name: 'Personal', icon: 'person-outline', color: 'secondary' },
+          { id: 3, name: 'Urgente', icon: 'alert-outline', color: 'danger' },
+          { id: 4, name: 'Mantenimiento', icon: 'construct-outline', color: 'warning' }
+        ];
+      }
+    });
+  }
+
+  // Método para recargar categorías
+  reloadCategories() {
+    this.fetchCategories();
   }
 
   fetchLocations() {
@@ -141,6 +172,7 @@ export class ModalComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al obtener ubicaciones:', err);
+        this.showToastMessage('Error al cargar ubicaciones', 'warning');
       }
     });
   }
@@ -190,37 +222,53 @@ export class ModalComponent implements OnInit {
     return category ? category.name : 'Sin categoría';
   }
 
+  // Método para obtener el ícono de una categoría
+  getCategoryIcon(categoryId: number | undefined): string {
+    if (!categoryId) return 'pricetag-outline';
+    const category = this.categories.find(c => c.id === categoryId);
+    return category?.icon || 'pricetag-outline';
+  }
+
+  // Método para obtener el color de una categoría
+  getCategoryColor(categoryId: number | undefined): string {
+    if (!categoryId) return 'medium';
+    const category = this.categories.find(c => c.id === categoryId);
+    return category?.color || 'medium';
+  }
+
   async createTask() {
     if (!this.isFormValid) {
-      this.showToastMessage('Por favor completa todos los campos requeridos');
+      this.showToastMessage('Por favor completa todos los campos requeridos', 'danger');
       return;
     }
 
     try {
       const taskPayload: Task = {
-        title: this.taskForm.title,
-        description: this.taskForm.description,
+        title: this.taskForm.title.trim(),
+        description: this.taskForm.description.trim(),
         date: this.taskForm.dueDate.split('T')[0], // Solo la fecha
         status: this.isEditing && this.task ? this.task.status : 'pending',
         priority: this.taskForm.priority,
-        user_id: 1, // Asegúrate de usar el ID del usuario actual
+        user_id: 1, // TODO: Usar el ID del usuario actual desde un servicio de autenticación
         category_id: this.taskForm.category_id,
         location_id: this.taskForm.location_id
       };
 
       if (this.isEditing && this.task?.id) {
         // Actualizar tarea existente
-        await this.taskService.updateTask(this.task.id, taskPayload).toPromise();
-        await this.modalController.dismiss({ action: 'updated', task: taskPayload });
+        const updatedTask = await this.taskService.updateTask(this.task.id, taskPayload).toPromise();
+        this.showToastMessage('Tarea actualizada correctamente', 'success');
+        await this.modalController.dismiss({ action: 'updated', task: updatedTask });
       } else {
         // Crear nueva tarea
         const createdTask = await this.taskService.createTask(taskPayload).toPromise();
+        this.showToastMessage('Tarea creada correctamente', 'success');
         await this.modalController.dismiss({ action: 'created', task: createdTask });
       }
       
     } catch (error) {
       console.error('Error al guardar la tarea:', error);
-      this.showToastMessage('Error al guardar la tarea. Intenta nuevamente.');
+      this.showToastMessage('Error al guardar la tarea. Intenta nuevamente.', 'danger');
     }
   }
 
@@ -228,8 +276,9 @@ export class ModalComponent implements OnInit {
     await this.modalController.dismiss();
   }
 
-  private showToastMessage(message: string) {
+  private showToastMessage(message: string, color: 'success' | 'danger' | 'warning' = 'danger') {
     this.toastMessage = message;
+    this.toastColor = color;
     this.showToast = true;
   }
 

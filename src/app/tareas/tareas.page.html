@@ -140,8 +140,9 @@
         <div class="location-info">
           <ion-icon name="location-outline" color="medium"></ion-icon>
           <div class="location-details">
-            <span class="location-name">{{ task.location.name }}</span>
-            <span class="location-address">{{ task.location.address }}</span>
+            <span class="location-name">{{ task.location?.name || 'Ubicación no asignada' }}</span>
+            <span class="location-address">{{ task.location?.address || '' }}</span>
+
           </div>
           <ion-badge color="primary" *ngIf="task.distance">
             {{ formatDistance(task.distance) }}
