@@ -30,7 +30,9 @@ import {
   IonSelectOption,
   IonText,
   IonProgressBar,
-  ModalController
+  ModalController,
+  AlertController,
+  ToastController
 } from '@ionic/angular/standalone';
 import { 
   addIcons 
@@ -49,10 +51,13 @@ import {
   trashOutline
 } from 'ionicons/icons';
 
-// Importar el modal component
+// Importar el modal component y servicios
 import { ModalComponent } from '../modal/modal.component';
+import { TaskService } from '../services/task.service'; // Ajusta la ruta según tu estructura
+import { Task } from '../interface/Itask.interface'; // Ajusta la ruta según tu estructura
 
-interface Task {
+// Interfaz local para mapeo de datos
+interface TaskDisplay {
   id: string;
   title: string;
   description: string;
@@ -108,72 +113,21 @@ interface Task {
 })
 export class TareasPage implements OnInit {
 
-  tasks: Task[] = [];
-  filteredTasks: Task[] = [];
+  tasks: TaskDisplay[] = [];
+  filteredTasks: TaskDisplay[] = [];
   searchTerm: string = '';
   selectedSegment: string = 'all';
   selectedPriority: string = 'all';
   selectedCategory: string = 'all';
   isLoading: boolean = false;
+  categories: string[] = [];
 
-  // Datos de ejemplo
-  mockTasks: Task[] = [
-    {
-      id: '1',
-      title: 'Reunión con cliente',
-      description: 'Presentar propuesta del nuevo proyecto',
-      status: 'pending',
-      priority: 'high',
-      category: 'Trabajo',
-      location: {
-        name: 'Oficina Central',
-        address: 'Av. Principal 123, San José',
-        latitude: 9.9281,
-        longitude: -84.0907
-      },
-      dueDate: new Date('2025-06-20'),
-      createdAt: new Date('2025-06-15'),
-      distance: 2.5
-    },
-    {
-      id: '2',
-      title: 'Comprar materiales',
-      description: 'Comprar materiales para el proyecto de construcción',
-      status: 'in-progress',
-      priority: 'medium',
-      category: 'Personal',
-      location: {
-        name: 'Ferretería El Martillo',
-        address: 'Calle 5, Heredia',
-        latitude: 9.9988,
-        longitude: -84.1175
-      },
-      dueDate: new Date('2025-06-18'),
-      createdAt: new Date('2025-06-16'),
-      distance: 5.2
-    },
-    {
-      id: '3',
-      title: 'Inspección de obra',
-      description: 'Revisar avances de construcción',
-      status: 'completed',
-      priority: 'high',
-      category: 'Trabajo',
-      location: {
-        name: 'Sitio de Construcción',
-        address: 'Cartago Centro',
-        latitude: 9.8644,
-        longitude: -83.9194
-      },
-      dueDate: new Date('2025-06-17'),
-      createdAt: new Date('2025-06-14'),
-      distance: 15.8
-    }
-  ];
-
-  categories = ['Trabajo', 'Personal', 'Urgente', 'Mantenimiento'];
-
-  constructor(private modalController: ModalController) {
+  constructor(
+    private modalController: ModalController,
+    private taskService: TaskService,
+    private alertController: AlertController,
+    private toastController: ToastController
+  ) {
     addIcons({
       add,
       locationOutline,
@@ -195,12 +149,90 @@ export class TareasPage implements OnInit {
 
   loadTasks() {
     this.isLoading = true;
-    // Simular carga de datos
-    setTimeout(() => {
-      this.tasks = [...this.mockTasks];
-      this.filterTasks();
-      this.isLoading = false;
-    }, 1000);
+    
+    this.taskService.getTasks().subscribe({
+      next: (tasks) => {
+        this.tasks = this.mapApiTasksToDisplay(tasks);
+        this.extractCategories();
+        this.filterTasks();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading tasks:', error);
+        this.showErrorToast('Error al cargar las tareas');
+        this.isLoading = false;
+      }
+    });
+  }
+
+  // Mapear las tareas de la API al formato que usa el componente
+  private mapApiTasksToDisplay(apiTasks: Task[]): TaskDisplay[] {
+    return apiTasks.map(task => ({
+      id: task.id?.toString() || '',
+      title: task.title || 'Sin título',
+      description: task.description || 'Sin descripción',
+      status: this.mapApiStatusToDisplay(task.status),
+      priority: this.mapApiPriorityToDisplay(task.priority),
+      category: task.Category?.name || 'Sin categoría',
+
+      location: {
+        name: task.Location?.name || 'Ubicación no asignada',
+        address: task.Location?.address || '',
+        latitude: task.Location?.latitude || 0,
+        longitude: task.Location?.longitude || 0
+      },
+      dueDate: new Date(task.date || Date.now()),
+      createdAt: new Date(task.createdAt || Date.now()),
+      distance: this.calculateDistance(task.Location?.latitude, task.Location?.longitude)
+    }));
+  }
+
+  // Mapear estados de la API a los estados del display
+  private mapApiStatusToDisplay(apiStatus: string): 'pending' | 'in-progress' | 'completed' {
+    switch (apiStatus?.toLowerCase()) {
+      case 'finalizado':
+      case 'completed':
+      case 'completado':
+        return 'completed';
+      case 'en-progreso':
+      case 'in-progress':
+      case 'progreso':
+        return 'in-progress';
+      case 'pendiente':
+      case 'pending':
+      default:
+        return 'pending';
+    }
+  }
+
+  // Mapear prioridades de la API a las prioridades del display
+  private mapApiPriorityToDisplay(apiPriority: string): 'low' | 'medium' | 'high' {
+    switch (apiPriority?.toLowerCase()) {
+      case 'alta':
+      case 'high':
+        return 'high';
+      case 'media':
+      case 'medium':
+        return 'medium';
+      case 'baja':
+      case 'low':
+      default:
+        return 'low';
+    }
+  }
+
+  // Extraer categorías únicas de las tareas
+  private extractCategories() {
+    const uniqueCategories = [...new Set(this.tasks.map(task => task.category))];
+    this.categories = uniqueCategories.filter(category => category && category !== 'Sin categoría');
+  }
+
+  // Calcular distancia (placeholder - necesitarías implementar cálculo real basado en geolocalización)
+  private calculateDistance(lat?: number, lng?: number): number | undefined {
+    if (!lat || !lng) return undefined;
+    // Implementar cálculo real de distancia basado en ubicación actual
+    // Por ahora retornamos un valor aleatorio para el ejemplo
+    return Math.random() * 20;
   }
 
   onRefresh(event: any) {
@@ -213,14 +245,11 @@ export class TareasPage implements OnInit {
   filterTasks() {
     this.filteredTasks = this.tasks.filter(task => {
       const matchesSearch = 
-  (task.title?.toLowerCase() ?? '').includes(this.searchTerm?.toLowerCase() ?? '') ||
-  (task.description?.toLowerCase() ?? '').includes(this.searchTerm?.toLowerCase() ?? '');
-;
+        (task.title?.toLowerCase() ?? '').includes(this.searchTerm?.toLowerCase() ?? '') ||
+        (task.description?.toLowerCase() ?? '').includes(this.searchTerm?.toLowerCase() ?? '');
       
       const matchesStatus = this.selectedSegment === 'all' || task.status === this.selectedSegment;
-      
       const matchesPriority = this.selectedPriority === 'all' || task.priority === this.selectedPriority;
-      
       const matchesCategory = this.selectedCategory === 'all' || task.category === this.selectedCategory;
 
       return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
@@ -249,9 +278,9 @@ export class TareasPage implements OnInit {
 
   getPriorityColor(priority: string): string {
     switch (priority) {
-      case 'high': return 'danger';
+      case 'high': return 'success';
       case 'medium': return 'warning';
-      case 'low': return 'success';
+      case 'low': return 'danger';
       default: return 'medium';
     }
   }
@@ -292,23 +321,46 @@ export class TareasPage implements OnInit {
     }
   }
 
-  toggleTaskStatus(task: Task) {
+  toggleTaskStatus(task: TaskDisplay) {
+    // Determinar nuevo estado
+    let newStatus: string;
     if (task.status === 'completed') {
+      newStatus = 'pendiente';
       task.status = 'pending';
     } else if (task.status === 'pending') {
+      newStatus = 'en-progreso';
       task.status = 'in-progress';
     } else {
+      newStatus = 'finalizado';
       task.status = 'completed';
     }
-    this.filterTasks();
+
+    // Actualizar en la API
+    const taskUpdate = {
+      ...task,
+      status: newStatus
+    };
+
+    this.taskService.updateTask(parseInt(task.id), taskUpdate as any).subscribe({
+      next: (updatedTask) => {
+        this.showSuccessToast('Estado de tarea actualizado');
+        this.filterTasks();
+      },
+      error: (error) => {
+        console.error('Error updating task status:', error);
+        this.showErrorToast('Error al actualizar el estado de la tarea');
+        // Revertir el cambio en la UI
+        this.loadTasks();
+      }
+    });
   }
 
-  viewOnMap(task: Task) {
+  viewOnMap(task: TaskDisplay) {
     // Navegar al mapa con la tarea seleccionada
     console.log('Viewing task on map:', task);
   }
 
-  async editTask(task: Task) {
+  async editTask(task: TaskDisplay) {
     const modal = await this.modalController.create({
       component: ModalComponent,
       componentProps: {
@@ -321,20 +373,48 @@ export class TareasPage implements OnInit {
 
     const { data } = await modal.onWillDismiss();
     if (data) {
-      // Actualizar la tarea existente
-      const index = this.tasks.findIndex(t => t.id === task.id);
-      if (index !== -1) {
-        this.tasks[index] = { ...data };
-        this.filterTasks();
-      }
+      // Actualizar la tarea en la API
+      this.taskService.updateTask(parseInt(task.id), data).subscribe({
+        next: (updatedTask) => {
+          this.showSuccessToast('Tarea actualizada correctamente');
+          this.loadTasks(); // Recargar todas las tareas
+        },
+        error: (error) => {
+          console.error('Error updating task:', error);
+          this.showErrorToast('Error al actualizar la tarea');
+        }
+      });
     }
   }
 
-  async deleteTask(task: Task) {
-    // Aquí podrías agregar un alert de confirmación
-    this.tasks = this.tasks.filter(t => t.id !== task.id);
-    this.filterTasks();
-    console.log('Task deleted:', task);
+  async deleteTask(task: TaskDisplay) {
+    const alert = await this.alertController.create({
+      header: 'Confirmar eliminación',
+      message: `¿Estás seguro de que deseas eliminar la tarea "${task.title}"?`,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Eliminar',
+          handler: () => {
+            this.taskService.deleteTask(parseInt(task.id)).subscribe({
+              next: () => {
+                this.showSuccessToast('Tarea eliminada correctamente');
+                this.loadTasks(); // Recargar las tareas
+              },
+              error: (error) => {
+                console.error('Error deleting task:', error);
+                this.showErrorToast('Error al eliminar la tarea');
+              }
+            });
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
   async createNewTask() {
@@ -346,25 +426,32 @@ export class TareasPage implements OnInit {
 
     const { data } = await modal.onWillDismiss();
     if (data) {
-      // Agregar la nueva tarea
-      this.tasks.push(data);
-      this.filterTasks();
+      // Crear nueva tarea en la API
+      this.taskService.createTask(data).subscribe({
+        next: (newTask) => {
+          this.showSuccessToast('Tarea creada correctamente');
+          this.loadTasks(); // Recargar todas las tareas
+        },
+        error: (error) => {
+          console.error('Error creating task:', error);
+          this.showErrorToast('Error al crear la tarea');
+        }
+      });
     }
   }
 
   formatDate(date: string | Date | undefined | null): string {
-  if (!date) return 'Fecha no disponible';
+    if (!date) return 'Fecha no disponible';
 
-  const parsed = new Date(date);
-  if (isNaN(parsed.getTime())) return 'Fecha inválida';
+    const parsed = new Date(date);
+    if (isNaN(parsed.getTime())) return 'Fecha inválida';
 
-  return parsed.toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
-}
-
+    return parsed.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }
 
   formatDistance(distance: number): string {
     if (distance < 1) {
@@ -375,5 +462,26 @@ export class TareasPage implements OnInit {
 
   isOverdue(dueDate: Date): boolean {
     return new Date() > dueDate;
+  }
+
+  // Métodos de utilidad para mostrar mensajes
+  private async showSuccessToast(message: string) {
+    const toast = await this.toastController.create({
+      message,
+      duration: 2000,
+      position: 'top',
+      color: 'success'
+    });
+    await toast.present();
+  }
+
+  private async showErrorToast(message: string) {
+    const toast = await this.toastController.create({
+      message,
+      duration: 3000,
+      position: 'top',
+      color: 'danger'
+    });
+    await toast.present();
   }
 }

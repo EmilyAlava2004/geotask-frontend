@@ -64,9 +64,9 @@ export class ModalComponent implements OnInit {
   categoriesError = false;
   
   priorities = [
-    { value: 'low', label: 'Baja', color: 'success' },
+    { value: 'low', label: 'Baja', color: 'danger' },
     { value: 'medium', label: 'Media', color: 'warning' },
-    { value: 'high', label: 'Alta', color: 'danger' }
+    { value: 'high', label: 'Alta', color: 'success' }
   ];
 
   isFormValid = false;
