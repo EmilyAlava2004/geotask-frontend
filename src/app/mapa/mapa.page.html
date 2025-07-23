@@ -1,6 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>mapa</ion-title>
+    <ion-title>Mapa</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -9,3 +9,6 @@
 </ion-content>
 
 <ion-button expand="full" (click)="guardarUbicacion()">Guardar Ubicación</ion-button>
+<ion-button color="primary" (click)="editarUbicacion(lastLocationId!)" [disabled]="!lastLocationId">Editar ubicación guardada</ion-button>
+<ion-button color="danger" (click)="eliminarUbicacion()">Eliminar ubicación</ion-button>
+

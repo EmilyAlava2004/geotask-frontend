@@ -27,4 +27,13 @@ export class LocationService {
   getLocations(): Observable<Location[]> {
     return this.http.get<Location[]>(this.apiUrl);
   }
+  
+  updateLocation(id: number, data: Partial<Location>) {
+  return this.http.put(`http://localhost:3000/api/locations/${id}`, data);
+}
+
+  deleteLocation(id: number) {
+  return this.http.delete(`http://localhost:3000/api/locations/${id}`);
+  }
+
 }

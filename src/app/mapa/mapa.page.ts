@@ -15,6 +15,7 @@ import { LocationService, Location } from 'src/app/services/location.service'; /
 })
 export class MapaPage implements OnInit {
 
+  lastLocationId: number | null = null;
   currentCoords: { lat: number; lng: number } | null = null;
 
   constructor(private locationService: LocationService) {}
@@ -60,24 +61,70 @@ export class MapaPage implements OnInit {
   }
 
   guardarUbicacion() {
-    if (!this.currentCoords) return;
+  if (!this.currentCoords) return;
 
-    const nuevaUbicacion: Location = {
-      name: 'Ubicación actual',
-      latitude: this.currentCoords.lat,
-      longitude: this.currentCoords.lng,
-      geofence_radius: 100
-    };
-
-    this.locationService.createLocation(nuevaUbicacion).subscribe({
-      next: res => {
-        console.log('Ubicación guardada:', res);
-        alert('Ubicación guardada correctamente');
-      },
-      error: err => {
-        console.error('Error al guardar ubicación', err);
-        alert('Error al guardar ubicación');
-      }
-    });
+  const nombre = prompt('Ingresa un nombre para la ubicación:', 'Ubicación actual');
+  if (!nombre || nombre.trim() === '') {
+    alert('Debes ingresar un nombre válido');
+    return;
   }
+
+  const nuevaUbicacion: Location = {
+    name: nombre.trim(),
+    latitude: this.currentCoords.lat,
+    longitude: this.currentCoords.lng,
+    geofence_radius: 100
+  };
+
+  this.locationService.createLocation(nuevaUbicacion).subscribe({
+    next: res => {
+      console.log('Ubicación guardada:', res);
+      this.lastLocationId = res.id as number;
+      alert('Ubicación guardada correctamente');
+    },
+    error: err => {
+      console.error('Error al guardar ubicación', err);
+      alert('Error al guardar ubicación');
+    }
+  });
+}
+
+
+  editarUbicacion(id: number) {
+  const nuevoNombre = prompt('Nuevo nombre para la ubicación:');
+  if (!nuevoNombre) return;
+
+  const datosActualizar = { name: nuevoNombre };
+
+  this.locationService.updateLocation(id, datosActualizar).subscribe({
+    next: (res) => {
+      alert('Ubicación actualizada correctamente');
+      console.log('Respuesta update:', res);
+    },
+    error: (err) => {
+      console.error('Error al actualizar ubicación:', err);
+      alert('Error al actualizar ubicación: ' + (err.error?.message || err.message));
+    }
+  });
+}
+
+  eliminarUbicacion() {
+  if (!this.lastLocationId) {
+    alert('No hay ubicación para eliminar');
+    return;
+  }
+
+  this.locationService.deleteLocation(this.lastLocationId).subscribe({
+    next: res => {
+      console.log('Ubicación eliminada:', res);
+      alert('Ubicación eliminada correctamente');
+      this.lastLocationId = null;
+    },
+    error: err => {
+      console.error('Error al eliminar ubicación', err);
+      alert('Error al eliminar ubicación');
+    }
+  });
+}
+
 }
