@@ -1,9 +1,146 @@
+/* Estilos del contenedor del menú */
 ion-menu::part(backdrop) {
-  background-color: rgba(255, 0, 255, 0.5);
+  background-color: rgba(0, 0, 0, 0.3) !important;
 }
 
 ion-menu::part(container) {
-  border-radius: 0 20px 20px 0;
+  border-radius: 0 20px 20px 0 !important;
+  box-shadow: 4px 0px 16px rgba(30, 117, 75, 0.3) !important;
+  background: #1E754B !important;
+}
 
-  box-shadow: 4px 0px 16px rgba(255, 0, 255, 0.18);
+/* Forzar el color de fondo del menú completo */
+.custom-menu {
+  --ion-background-color: #1E754B !important;
+}
+
+/* Header del menú */
+.menu-header {
+  background: #1E754B !important;
+  background-color: #1E754B !important;
+  padding: 40px 20px 20px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.app-title h2 {
+  color: white !important;
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.app-title p {
+  color: rgba(255, 255, 255, 0.8) !important;
+  margin: 2px 0 0 0;
+  font-size: 14px;
+  font-weight: 300;
+}
+
+/* Contenido del menú */
+.menu-content {
+  --background: #5aad85 !important;
+  --ion-background-color: #5aad85 !important;
+  --color: white !important;
+  background: #5aad85 !important;
+  background-color: #5aad85 !important;
+}
+
+.menu-list {
+  background: transparent !important;
+  background-color: transparent !important;
+  padding: 20px 0;
+}
+
+.menu-item {
+  --background: transparent !important;
+  --color: white !important;
+  --border-color: transparent !important;
+  --ion-item-background: transparent !important;
+  margin: 8px 20px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: transparent !important;
+}
+
+.menu-item:hover {
+  --background: rgba(255, 255, 255, 0.1) !important;
+  --ion-item-background: rgba(255, 255, 255, 0.1) !important;
+  transform: translateX(5px);
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.menu-icon {
+  color: white !important;
+  font-size: 22px;
+  margin-right: 15px;
+}
+
+.menu-label {
+  color: white !important;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Efectos adicionales */
+.menu-item::part(native) {
+  border-radius: 12px !important;
+  transition: all 0.3s ease;
+  background: transparent !important;
+  color: white !important;
+}
+
+.menu-item:hover::part(native) {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Forzar estilos en elementos internos de Ionic */
+.menu-content ion-list {
+  background: transparent !important;
+}
+
+.menu-content ion-item {
+  --ion-item-background: transparent !important;
+  color: white !important;
+}
+
+.menu-content ion-label {
+  color: white !important;
+}
+
+.menu-content ion-icon {
+  color: white !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .menu-header {
+    padding: 30px 15px 15px 15px;
+  }
+  
+  .logo-image {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .app-title h2 {
+    font-size: 22px;
+  }
+  
+  .menu-item {
+    margin: 6px 15px;
+  }
 }

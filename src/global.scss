@@ -36,3 +36,20 @@
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
 @import 'node_modules/mapbox-gl/dist/mapbox-gl.css';
+// En tu archivo variables.scss o global.scss
+ion-menu.custom-menu {
+  --ion-background-color: #5aad85 !important;
+  
+  ion-header ion-toolbar {
+    --background: #5aad85 !important;
+  }
+  
+  ion-content {
+    --background: #5aad85 !important;
+  }
+  
+  ion-list {
+    background: transparent !important;
+  }
+  
+}

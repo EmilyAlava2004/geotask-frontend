@@ -1,27 +1,36 @@
 <ion-app>
-  <ion-menu *ngIf="showMenu" contentId="main-content">
-    <ion-header>
-      <ion-toolbar color="tertiary">
-        <ion-title>Menu Content</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-      <ion-list>
-        <ion-item button (click)="navigateAndClose('/tabs/mapa')">
-          <ion-icon name="map-sharp" slot="start"></ion-icon>
-          <ion-label>Mapa</ion-label>
+  <ion-menu *ngIf="showMenu" contentId="main-content" class="custom-menu">
+    <!-- Header con logo y título -->
+    <div class="menu-header">
+      <div class="logo-container">
+        <img src="assets/icon/Logo.png" alt="GTM Logo" class="logo-image">
+        <div class="app-title">
+          <h2>GTM</h2>
+          <p>Geo Task Manager</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Contenido del menú -->
+    <ion-content class="menu-content">
+      <ion-list class="menu-list">
+        <ion-item button (click)="navigateAndClose('/tabs/mapa')" class="menu-item">
+          <ion-icon name="map-sharp" slot="start" class="menu-icon"></ion-icon>
+          <ion-label class="menu-label">Mapa</ion-label>
         </ion-item>
-        <ion-item button (click)="navigateAndClose('/settings')">
-          <ion-icon name="settings-sharp" slot="start"></ion-icon>
-          <ion-label>Settings</ion-label>
+        
+        <ion-item button (click)="navigateAndClose('/settings')" class="menu-item">
+          <ion-icon name="settings-sharp" slot="start" class="menu-icon"></ion-icon>
+          <ion-label class="menu-label">Settings</ion-label>
         </ion-item>
-        <ion-item button (click)="navigateAndClose('/tabs/tareas')">
-          <ion-icon name="checkbox-sharp" slot="start"></ion-icon>
-          <ion-label>Tareas</ion-label>
+        
+        <ion-item button (click)="navigateAndClose('/tabs/tareas')" class="menu-item">
+          <ion-icon name="checkbox-sharp" slot="start" class="menu-icon"></ion-icon>
+          <ion-label class="menu-label">Tareas</ion-label>
         </ion-item>
       </ion-list>
     </ion-content>
   </ion-menu>
-
+  
   <ion-router-outlet id="main-content"></ion-router-outlet>
 </ion-app>

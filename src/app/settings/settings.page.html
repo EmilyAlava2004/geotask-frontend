@@ -1,13 +1,294 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>settings</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button (click)="goBack()"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Configuración</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="saveSettings()" fill="clear">
+        <ion-icon name="save-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">settings</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <!-- Perfil de Usuario -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Perfil de Usuario</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="profile-container">
+        <div class="avatar-container">
+          <ion-avatar>
+            <img [src]="userProfile.avatar" alt="Avatar">
+          </ion-avatar>
+        <!--<ion-button 
+            fill="clear" 
+            size="small" 
+            class="change-avatar-btn"
+            (click)="changeAvatar()">
+            <ion-icon name="camera-outline"></ion-icon>
+          </ion-button>-->
+        </div>
+        <div class="profile-inputs">
+          <ion-item>
+            <ion-label position="stacked">Nombre de usuario</ion-label>
+            <ion-input 
+              [(ngModel)]="userProfile.name" 
+              placeholder="Ingresa tu nombre">
+            </ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Correo electrónico</ion-label>
+            <ion-input 
+              type="email"
+              [(ngModel)]="userProfile.email" 
+              placeholder="correo@ejemplo.com">
+            </ion-input>
+          </ion-item>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Configuración de Notificaciones -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Notificaciones</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>
+          <h3>Notificaciones Push</h3>
+          <p>Recibir notificaciones en tiempo real</p>
+        </ion-label>
+        <ion-toggle 
+          [(ngModel)]="notifications.pushNotifications"
+          slot="end">
+        </ion-toggle>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>
+          <h3>Notificaciones de Proximidad</h3>
+          <p>Alertas cuando estés cerca de una tarea</p>
+        </ion-label>
+        <ion-toggle 
+          [(ngModel)]="notifications.proximityNotifications"
+          slot="end">
+        </ion-toggle>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>
+          <h3>Recordatorios de Tareas</h3>
+          <p>Recordatorios programados</p>
+        </ion-label>
+        <ion-toggle 
+          [(ngModel)]="notifications.taskReminders"
+          slot="end">
+        </ion-toggle>
+      </ion-item>
+
+      <ion-item button="true" (click)="openNotificationsPage()">
+        <ion-label>Ver todas las configuraciones de notificaciones</ion-label>
+        <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Configuración de Mapa -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Configuración de Mapa</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>Tipo de Mapa</ion-label>
+        <ion-select 
+          [(ngModel)]="mapSettings.mapType" 
+          placeholder="Seleccionar"
+          slot="end">
+          <ion-select-option value="roadmap">Mapa de Carreteras</ion-select-option>
+          <ion-select-option value="satellite">Satélite</ion-select-option>
+          <ion-select-option value="hybrid">Híbrido</ion-select-option>
+          <ion-select-option value="terrain">Terreno</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>
+          <h3>Radio de Proximidad</h3>
+          <p>Distancia para notificaciones: {{mapSettings.proximityRadius}}m</p>
+        </ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-range
+          min="50"
+          max="1000"
+          step="50"
+          [(ngModel)]="mapSettings.proximityRadius"
+          (ionInput)="onProximityRadiusChange($event)">
+          <ion-label slot="start">50m</ion-label>
+          <ion-label slot="end">1000m</ion-label>
+        </ion-range>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>
+          <h3>Mostrar Ubicación Actual</h3>
+          <p>Mostrar tu ubicación en el mapa</p>
+        </ion-label>
+        <ion-toggle 
+          [(ngModel)]="mapSettings.showCurrentLocation"
+          slot="end">
+        </ion-toggle>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Configuración de Sincronización -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Sincronización</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>
+          <h3>Sincronización Automática</h3>
+          <p>Sincronizar datos automáticamente</p>
+        </ion-label>
+        <ion-toggle 
+          [(ngModel)]="syncSettings.autoSync"
+          slot="end">
+        </ion-toggle>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>
+          <h3>Solo WiFi</h3>
+          <p>Sincronizar solo con conexión WiFi</p>
+        </ion-label>
+        <ion-toggle 
+          [(ngModel)]="syncSettings.wifiOnly"
+          slot="end">
+        </ion-toggle>
+      </ion-item>
+
+      <ion-button 
+        expand="block" 
+        fill="outline"
+        (click)="forceSyncNow()">
+        <ion-icon name="sync-outline" slot="start"></ion-icon>
+        Sincronizar Ahora
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Configuración de Seguridad -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Seguridad</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>
+          <h3>Autenticación Biométrica</h3>
+          <p>Usar huella digital o reconocimiento facial</p>
+        </ion-label>
+        <ion-toggle 
+          [(ngModel)]="securitySettings.biometricAuth"
+          slot="end">
+        </ion-toggle>
+      </ion-item>
+
+      <ion-button 
+        expand="block" 
+        fill="outline"
+        (click)="changePassword()">
+        <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+        Cambiar Contraseña
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Configuración de la Aplicación -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Aplicación</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>Tema</ion-label>
+        <ion-select 
+          [(ngModel)]="appSettings.theme" 
+          placeholder="Seleccionar"
+          slot="end">
+          <ion-select-option value="auto">Automático</ion-select-option>
+          <ion-select-option value="light">Claro</ion-select-option>
+          <ion-select-option value="dark">Oscuro</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Idioma</ion-label>
+        <ion-select 
+          [(ngModel)]="appSettings.language" 
+          placeholder="Seleccionar"
+          slot="end">
+          <ion-select-option value="es">Español</ion-select-option>
+          <ion-select-option value="en">English</ion-select-option>
+          <ion-select-option value="pt">Português</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-button 
+        expand="block" 
+        fill="outline"
+        color="medium"
+        (click)="clearCache()">
+        <ion-icon name="trash-outline" slot="start"></ion-icon>
+        Limpiar Caché
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Información -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Información</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>Versión de la aplicación</ion-label>
+        <ion-note slot="end">{{appInfo.version}}</ion-note>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label>Última sincronización</ion-label>
+        <ion-note slot="end">{{appInfo.lastSync}}</ion-note>
+      </ion-item>
+
+      <ion-item button="true" (click)="showAbout()">
+        <ion-label>Acerca de GeoTask Manager</ion-label>
+        <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Cerrar Sesión -->
+  <ion-card>
+    <ion-card-content>
+      <ion-button 
+        expand="block" 
+        color="danger"
+        fill="outline"
+        (click)="logout()">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        Cerrar Sesión
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
 </ion-content>

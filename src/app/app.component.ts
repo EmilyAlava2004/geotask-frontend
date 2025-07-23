@@ -43,7 +43,7 @@ export class AppComponent {
 
  updateMenuVisibility() {
   const currentRoute = this.router.url;
-  if (currentRoute.includes('/login') || currentRoute.includes('/registrer')||currentRoute.includes('/tabs/perfil')) {
+  if (currentRoute.includes('/login') || currentRoute.includes('/registrer')||currentRoute.includes('/tabs/perfil')||currentRoute.includes('/tabs/mapa')) {
     this.showMenu = false;
   } else {
     this.showMenu = true;
