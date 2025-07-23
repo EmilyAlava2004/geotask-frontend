@@ -34,9 +34,14 @@ import {
   AlertController,
   ToastController
 } from '@ionic/angular/standalone';
+import {
+  settingsOutline // <-- Agregar este ícono
+} from 'ionicons/icons';
 import { 
   addIcons 
 } from 'ionicons';
+import { Router } from '@angular/router';
+
 import { 
   add, 
   locationOutline, 
@@ -105,7 +110,6 @@ interface TaskDisplay {
     IonSelect,
     IonSelectOption,
     IonProgressBar, 
-    IonMenuButton
   ]
 })
 export class TareasPage implements OnInit {
@@ -120,6 +124,7 @@ export class TareasPage implements OnInit {
   categories: string[] = [];
 
   constructor(
+     private router: Router,
     private modalController: ModalController,
     private taskService: TaskService,
     private alertController: AlertController,
@@ -136,14 +141,17 @@ export class TareasPage implements OnInit {
       searchOutline,
       mapOutline,
       createOutline,
-      trashOutline
+      trashOutline,
+      settingsOutline
     });
   }
 
   ngOnInit() {
     this.loadTasks();
   }
-
+goToSettings() {
+  this.router.navigate(['/settings']);
+}
   loadTasks() {
     this.isLoading = true;
     

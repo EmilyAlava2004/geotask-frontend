@@ -1,12 +1,20 @@
 <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-menu-button></ion-menu-button>
-        </ion-buttons>
-        <ion-title>GeoTask Manager</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goToSettings()" fill="clear">
+        <ion-icon name="settings-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    
+    <ion-title class="custom-title">
+      <div class="title-container">
+        <img src="assets/icon/Logo.png" alt="Logo" class="app-logo">
+      </div>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+    
+    
 <ion-content [fullscreen]="true">
   <!-- Pull to refresh -->
   <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
@@ -197,7 +205,7 @@
 
   <!-- Floating Action Button -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="createNewTask()" color="secondary">
+    <ion-fab-button (click)="createNewTask()" color="primary">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>

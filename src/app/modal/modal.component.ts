@@ -4,15 +4,16 @@ import { FormsModule } from '@angular/forms';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonItem,
   IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonDatetime,
- IonButtons, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
+  IonButtons, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
   IonCardTitle, IonCardContent, IonChip, IonToast, IonSearchbar, IonList,
- ModalController, IonSpinner
+  ModalController, IonSpinner,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   close, checkmarkOutline, locationOutline, timeOutline,
   alertCircleOutline, documentTextOutline, pricetagOutline,
-  flagOutline, mapOutline, saveOutline, addOutline, refreshOutline
+  flagOutline, mapOutline, saveOutline, addOutline, refreshOutline,
+  colorPaletteOutline, createOutline
 } from 'ionicons/icons';
 import { LocationService, Location } from '../services/location.service';
 import { TaskService } from '../services/task.service';
@@ -26,15 +27,16 @@ import { Task } from '../interface/Itask.interface';
   imports: [
     CommonModule, FormsModule,
     IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonItem,
-    IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonDatetime, IonButtons, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
+    IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonDatetime, 
+    IonButtons, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
     IonCardTitle, IonCardContent, IonChip, IonToast, IonSearchbar, IonList, 
-     IonSpinner
+    IonSpinner
   ]
 })
 export class ModalComponent implements OnInit {
   @Input() task?: Task;
   @Input() isEditing: boolean = false;
-  @Input() selectedDate?: string; // Nueva propiedad para recibir la fecha seleccionada
+  @Input() selectedDate?: string;
 
   minDate = new Date().toISOString();
   modalTitle = 'Nueva Tarea';
@@ -79,6 +81,46 @@ export class ModalComponent implements OnInit {
   showLocationSearch = false;
   selectedLocation: Location | null = null;
 
+  // Variables para la sección flotante de categorías
+  showCategoryForm = false;
+  isCreatingCategory = false;
+  newCategory: {
+    name: string;
+    icon: string;
+    color: string;
+  } = {
+    name: '',
+    icon: 'pricetag-outline',
+    color: 'primary'
+  };
+
+  // Opciones predefinidas para íconos y colores
+  availableIcons = [
+    { value: 'briefcase-outline', label: 'Trabajo' },
+    { value: 'person-outline', label: 'Personal' },
+    { value: 'home-outline', label: 'Casa' },
+    { value: 'car-outline', label: 'Transporte' },
+    { value: 'fitness-outline', label: 'Deporte' },
+    { value: 'medical-outline', label: 'Salud' },
+    { value: 'book-outline', label: 'Educación' },
+    { value: 'restaurant-outline', label: 'Comida' },
+    { value: 'construct-outline', label: 'Mantenimiento' },
+    { value: 'gift-outline', label: 'Eventos' },
+    { value: 'heart-outline', label: 'Familia' },
+    { value: 'cash-outline', label: 'Finanzas' }
+  ];
+
+  availableColors = [
+    { value: 'primary', label: 'Azul', hex: '#3880ff' },
+    { value: 'secondary', label: 'Gris', hex: '#92949c' },
+    { value: 'tertiary', label: 'Violeta', hex: '#5260ff' },
+    { value: 'success', label: 'Verde', hex: '#2dd36f' },
+    { value: 'warning', label: 'Naranja', hex: '#ffc409' },
+    { value: 'danger', label: 'Rojo', hex: '#eb445a' },
+    { value: 'dark', label: 'Negro', hex: '#222428' },
+    { value: 'medium', label: 'Medio', hex: '#92949c' }
+  ];
+
   constructor(
     private modalController: ModalController,
     private locationService: LocationService,
@@ -88,12 +130,12 @@ export class ModalComponent implements OnInit {
     addIcons({
       close, checkmarkOutline, locationOutline, timeOutline,
       alertCircleOutline, documentTextOutline, pricetagOutline,
-      flagOutline, mapOutline, saveOutline, addOutline, refreshOutline
+      flagOutline, mapOutline, saveOutline, addOutline, refreshOutline,
+      colorPaletteOutline, createOutline
     });
   }
 
   ngOnInit() {
-    // Si se pasa una fecha seleccionada, usarla como fecha por defecto
     if (this.selectedDate) {
       this.taskForm.dueDate = this.selectedDate + 'T12:00:00.000Z';
     }
@@ -116,11 +158,10 @@ export class ModalComponent implements OnInit {
         description: this.task.description,
         priority: this.task.priority,
         category_id: this.task.category_id || undefined,
-        dueDate: this.task.date + 'T12:00:00.000Z', // Convertir fecha a formato datetime
+        dueDate: this.task.date + 'T12:00:00.000Z',
         location_id: this.task.location_id || undefined
       };
       
-      // Cargar la ubicación seleccionada si existe
       if (this.task.Location) {
         this.selectedLocation = this.task.Location;
       }
@@ -138,7 +179,6 @@ export class ModalComponent implements OnInit {
     this.validateForm();
   }
 
-  // Método para cargar categorías desde la API
   fetchCategories() {
     this.isLoadingCategories = true;
     this.categoriesError = false;
@@ -154,7 +194,6 @@ export class ModalComponent implements OnInit {
         this.isLoadingCategories = false;
         this.showToastMessage('Error al cargar las categorías', 'warning');
         
-        // Fallback a categorías predefinidas en caso de error
         this.categories = [
           { id: 1, name: 'Trabajo', icon: 'briefcase-outline', color: 'primary' },
           { id: 2, name: 'Personal', icon: 'person-outline', color: 'secondary' },
@@ -165,7 +204,6 @@ export class ModalComponent implements OnInit {
     });
   }
 
-  // Método para recargar categorías
   reloadCategories() {
     this.fetchCategories();
   }
@@ -227,18 +265,99 @@ export class ModalComponent implements OnInit {
     return category ? category.name : 'Sin categoría';
   }
 
-  // Método para obtener el ícono de una categoría
   getCategoryIcon(categoryId: number | undefined): string {
     if (!categoryId) return 'pricetag-outline';
     const category = this.categories.find(c => c.id === categoryId);
     return category?.icon || 'pricetag-outline';
   }
 
-  // Método para obtener el color de una categoría
   getCategoryColor(categoryId: number | undefined): string {
     if (!categoryId) return 'medium';
     const category = this.categories.find(c => c.id === categoryId);
     return category?.color || 'medium';
+  }
+
+  // Métodos para la sección flotante de categorías
+  toggleCategoryForm() {
+    this.showCategoryForm = !this.showCategoryForm;
+    if (this.showCategoryForm) {
+      this.resetCategoryForm();
+    }
+  }
+
+  resetCategoryForm() {
+    this.newCategory = {
+      name: '',
+      icon: 'pricetag-outline',
+      color: 'primary'
+    };
+  }
+
+  validateCategoryForm(): boolean {
+    return this.newCategory.name.trim().length > 0 &&
+           this.newCategory.icon.length > 0 &&
+           this.newCategory.color.length > 0;
+  }
+
+  async createCategory() {
+    if (!this.validateCategoryForm()) {
+      this.showToastMessage('Por favor completa todos los campos de la categoría', 'danger');
+      return;
+    }
+
+    // Verificar si ya existe una categoría con el mismo nombre
+    const existingCategory = this.categories.find(
+      cat => cat.name.toLowerCase() === this.newCategory.name.trim().toLowerCase()
+    );
+
+    if (existingCategory) {
+      this.showToastMessage('Ya existe una categoría con ese nombre', 'warning');
+      return;
+    }
+
+    this.isCreatingCategory = true;
+
+    try {
+      const categoryData = {
+        name: this.newCategory.name.trim(),
+        icon: this.newCategory.icon,
+        color: this.newCategory.color
+      };
+
+      const createdCategory = await this.categoriasService.createCategory(categoryData).toPromise();
+    
+  // Verificar si createdCategory es válido antes de agregarlo
+  if (createdCategory) {
+    // Agregar la nueva categoría a la lista local
+    this.categories.push(createdCategory);
+
+    // Seleccionar automáticamente la nueva categoría
+    this.taskForm.category_id = createdCategory.id;
+
+    // Cerrar el formulario y mostrar mensaje de éxito
+    this.showCategoryForm = false;
+    this.showToastMessage('Categoría creada exitosamente', 'success');
+    this.validateForm();
+  } else {
+    // Manejar el caso donde createdCategory es undefined
+    this.showToastMessage('Error al crear la categoría. Intenta nuevamente.', 'danger');
+  }
+    } catch (error) {
+      console.error('Error al crear categoría:', error);
+      this.showToastMessage('Error al crear la categoría. Intenta nuevamente.', 'danger');
+    } finally {
+      this.isCreatingCategory = false;
+    }
+  }
+
+  getIconLabel(iconValue: string): string {
+    const icon = this.availableIcons.find(i => i.value === iconValue);
+    return icon ? icon.label : iconValue;
+  }
+
+  getColorHex(colorValue: string): string {
+    const color = this.availableColors.find(c => c.value === colorValue);
+    return color ? color.hex : '#3880ff';
   }
 
   async createTask() {
@@ -251,21 +370,19 @@ export class ModalComponent implements OnInit {
       const taskPayload: Task = {
         title: this.taskForm.title.trim(),
         description: this.taskForm.description.trim(),
-        date: this.taskForm.dueDate.split('T')[0], // Solo la fecha
+        date: this.taskForm.dueDate.split('T')[0],
         status: this.isEditing && this.task ? this.task.status : 'pending',
         priority: this.taskForm.priority,
-        user_id: 1, // TODO: Usar el ID del usuario actual desde un servicio de autenticación
+        user_id: 1,
         category_id: this.taskForm.category_id,
         location_id: this.taskForm.location_id
       };
 
       if (this.isEditing && this.task?.id) {
-        // Actualizar tarea existente
         const updatedTask = await this.taskService.updateTask(this.task.id, taskPayload).toPromise();
         this.showToastMessage('Tarea actualizada correctamente', 'success');
         await this.modalController.dismiss({ action: 'updated', task: updatedTask });
       } else {
-        // Crear nueva tarea
         const createdTask = await this.taskService.createTask(taskPayload).toPromise();
         this.showToastMessage('Tarea creada correctamente', 'success');
         await this.modalController.dismiss({ action: 'created', task: createdTask });

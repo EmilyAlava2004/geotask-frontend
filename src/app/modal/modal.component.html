@@ -50,6 +50,14 @@
         <ion-card-title>
           <ion-icon name="pricetag-outline"></ion-icon>
           Categoría y Prioridad
+          <ion-button 
+            fill="clear" 
+            size="small" 
+            (click)="toggleCategoryForm()"
+            class="add-category-btn">
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            Nueva
+          </ion-button>
         </ion-card-title>
       </ion-card-header>
       <ion-card-content>
@@ -121,12 +129,6 @@
 
     <!-- Ubicación -->
     <ion-card class="form-section">
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="location-outline"></ion-icon>
-          Ubicación (Opcional)
-        </ion-card-title>
-      </ion-card-header>
       <ion-card-content>
         <ion-item>
           <ion-label position="stacked">Ubicación</ion-label>
@@ -190,7 +192,6 @@
       </ion-card-header>
       <ion-card-content>
         <ion-item>
-          <ion-label position="stacked">Fecha límite</ion-label>
           <ion-datetime 
             name="dueDate"
             [(ngModel)]="taskForm.dueDate"
@@ -221,6 +222,98 @@
       (click)="cancel()">
       Cancelar
     </ion-button>
+  </div>
+
+  <!-- Sección Flotante para Crear Categorías -->
+  <div class="floating-category-section" [class.show]="showCategoryForm">
+    <div class="floating-overlay" (click)="toggleCategoryForm()"></div>
+    <div class="floating-card">
+      <div class="floating-header">
+        <h3>
+          <ion-icon name="create-outline"></ion-icon>
+          Nueva Categoría
+        </h3>
+        <ion-button fill="clear" size="small" (click)="toggleCategoryForm()">
+          <ion-icon name="close"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="floating-content">
+        <!-- Nombre de la categoría -->
+        <ion-item>
+          <ion-label position="stacked">Nombre *</ion-label>
+          <ion-input 
+            [(ngModel)]="newCategory.name"
+            placeholder="Ej: Trabajo, Personal, Hogar..."
+            maxlength="30"
+            counter="true">
+          </ion-input>
+        </ion-item>
+
+        <!-- Selector de íconos -->
+        <ion-item>
+          <ion-label position="stacked">Ícono</ion-label>
+          <div class="icon-selector">
+            <div 
+              *ngFor="let icon of availableIcons" 
+              class="icon-option"
+              [class.selected]="newCategory.icon === icon.value"
+              (click)="newCategory.icon = icon.value">
+              <ion-icon [name]="icon.value"></ion-icon>
+              <span>{{icon.label}}</span>
+            </div>
+          </div>
+        </ion-item>
+
+        <!-- Selector de colores -->
+        <ion-item>
+          <ion-label position="stacked">Color</ion-label>
+          <div class="color-selector">
+            <div 
+              *ngFor="let color of availableColors" 
+              class="color-option"
+              [class.selected]="newCategory.color === color.value"
+              (click)="newCategory.color = color.value"
+              [style.background-color]="color.hex">
+              <ion-icon 
+                name="checkmark-outline" 
+                *ngIf="newCategory.color === color.value">
+              </ion-icon>
+            </div>
+          </div>
+        </ion-item>
+
+        <!-- Vista previa -->
+        <div class="category-preview" *ngIf="newCategory.name.trim()">
+          <ion-label>Vista previa:</ion-label>
+          <ion-chip [color]="newCategory.color">
+            <ion-icon [name]="newCategory.icon"></ion-icon>
+            <ion-label>{{newCategory.name}}</ion-label>
+          </ion-chip>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="floating-actions">
+          <ion-button 
+            expand="block" 
+            (click)="createCategory()"
+            [disabled]="!validateCategoryForm() || isCreatingCategory"
+            color="primary">
+            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+            <span *ngIf="!isCreatingCategory">Crear Categoría</span>
+            <ion-spinner name="crescent" *ngIf="isCreatingCategory"></ion-spinner>
+          </ion-button>
+          
+          <ion-button 
+            expand="block" 
+            fill="clear" 
+            (click)="toggleCategoryForm()"
+            [disabled]="isCreatingCategory">
+            Cancelar
+          </ion-button>
+        </div>
+      </div>
+    </div>
   </div>
 
 </ion-content>

@@ -1,18 +1,20 @@
 <ion-content [fullscreen]="true">
   <div class="ion-page" id="main-content">
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-menu-button></ion-menu-button>
-        </ion-buttons>
-        <ion-title>GeoTask Manager</ion-title>
-        <ion-buttons slot="end">
-          <ion-button (click)="refreshTasks()" fill="clear" [disabled]="isLoading">
-            <ion-icon name="refresh-outline"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
+   <ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goToSettings()" fill="clear">
+        <ion-icon name="settings-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    
+    <ion-title class="custom-title">
+      <div class="title-container">
+        <img src="assets/icon/Logo.png" alt="Logo" class="app-logo">
+      </div>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
     
     <ion-content class="ion-padding">
       

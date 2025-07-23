@@ -1,3 +1,56 @@
+ion-header {
+  ion-toolbar {
+    --background: #ffffff;
+    --color: #000000;
+    --border-color: #e0e0e0;
+    --border-width: 0 0 1px 0;
+    --border-style: solid;
+    height: 56px;
+
+    .custom-title {
+      text-align: center;
+      padding: 0;
+
+      .title-container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end; 
+        gap: 10px;
+        height: 100%;
+
+        .app-logo {
+          height: 32px;
+          width: auto;
+          max-width: 120px;
+          object-fit: contain;
+          filter: none;
+          margin: 15px ;
+        }
+      }
+    }
+
+    ion-buttons {
+      ion-button {
+        --color: #666666;
+        --padding-start: 8px;
+        --padding-end: 8px;
+
+        &:hover {
+          --background: rgba(0, 0, 0, 0.05);
+          --border-radius: 8px;
+        }
+
+        &[disabled] {
+          --color: #cccccc;
+        }
+
+        ion-icon {
+          font-size: 22px;
+        }
+      }
+    }
+  }
+}
 // Variables principales
 :root {
   --task-card-border-radius: 16px;
@@ -10,6 +63,7 @@
 // Contenedor principal
 ion-content {
   --background: #f8f9fa;
+  --color: #333333; // Asegurar texto oscuro sobre fondo claro
 }
 
 // Contenedor de búsqueda
@@ -34,6 +88,7 @@ ion-content {
 // Contenedor de filtros
 .filters-container {
   background: white;
+  color: #333333; // Texto oscuro para buena legibilidad
   padding: 16px;
   margin-bottom: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -64,12 +119,14 @@ ion-content {
     ion-item {
       --border-radius: 8px;
       --background: #f8f9fa;
+      --color: #333333; // Texto oscuro
       --inner-padding-end: 12px;
       --inner-padding-start: 12px;
       --min-height: 44px;
       margin-bottom: 8px;
       
       ion-select {
+        --color: #333333; // Texto del select en oscuro
         font-size: 14px;
         
         &::part(icon) {
@@ -111,6 +168,8 @@ ion-content {
 
 // Tarjetas de tareas
 .task-card {
+  background: white; // Fondo blanco forzado
+  color: #333333; // Texto oscuro
   margin: var(--task-card-margin) 0;
   border-radius: var(--task-card-border-radius);
   box-shadow: var(--task-card-shadow);
@@ -155,11 +214,15 @@ ion-content {
   }
   
   ion-card-header {
+    background: white; // Fondo blanco del header
+    color: #333333; // Texto oscuro
     padding: var(--task-card-padding);
     padding-bottom: 8px;
   }
   
   ion-card-content {
+    background: white; // Fondo blanco del contenido
+    color: #333333; // Texto oscuro
     padding: 0 var(--task-card-padding) var(--task-card-padding);
   }
 }
@@ -321,14 +384,17 @@ ion-content {
   border-top: 1px solid #eee;
   padding-top: 12px;
   margin-top: 16px;
+  background: white; // Fondo blanco
   
   ion-button {
     --color: #666;
+    --background: transparent; // Fondo transparente para botones
     font-size: 13px;
     font-weight: 500;
     
     &:hover {
       --color: var(--ion-color-primary);
+      --background: rgba(var(--ion-color-primary-rgb), 0.1);
     }
     
     ion-icon {
@@ -401,91 +467,6 @@ ion-progress-bar {
 
 .task-card {
   animation: slideInUp 0.3s ease-out;
-}
-
-// Dark mode support
-@media (prefers-color-scheme: dark) {
-  ion-content {
-    --background: #1a1a1a;
-  }
-  
-  .search-container {
-    background: var(--ion-color-primary);
-    
-    ion-searchbar {
-      --background: rgba(30, 30, 30, 0.9);
-      --color: #ffffff;
-      --placeholder-color: #cccccc;
-    }
-  }
-  
-  .filters-container {
-    background: #2a2a2a;
-    
-    .additional-filters {
-      ion-item {
-        --background: #333333;
-        --color: #ffffff;
-      }
-    }
-  }
-  
-  .task-card {
-    background: #2a2a2a;
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-    
-    &.completed {
-      background: #333333;
-    }
-    
-    .task-title {
-      color: #ffffff;
-    }
-    
-    .task-description {
-      color: #cccccc;
-    }
-    
-    .location-info {
-      background: rgba(var(--ion-color-primary-rgb), 0.15);
-      
-      .location-name {
-        color: #ffffff;
-      }
-      
-      .location-address {
-        color: #cccccc;
-      }
-    }
-    
-    .due-date {
-      color: #cccccc;
-    }
-    
-    .action-buttons {
-      border-top-color: #444;
-      
-      ion-button {
-        --color: #cccccc;
-        
-        &:hover {
-          --color: var(--ion-color-primary);
-        }
-      }
-    }
-  }
-  
-  .empty-state {
-    color: #cccccc;
-    
-    h3 {
-      color: #ffffff;
-    }
-    
-    ion-icon {
-      color: #666666;
-    }
-  }
 }
 
 // Mejoras adicionales de accesibilidad

@@ -20,6 +20,9 @@ import { Router } from '@angular/router';
 import { TaskService } from '../services/task.service';
 import { Task } from '../interface/Itask.interface';
 import { ModalComponent } from '../modal/modal.component';
+import {
+  settingsOutline // <-- Agregar este ícono
+} from 'ionicons/icons';
 
 interface CalendarDay {
   date: number;
@@ -85,7 +88,8 @@ export class HomePage implements OnInit {
       add,
       navigate,
       personOutline,
-      refreshOutline
+      refreshOutline,
+      settingsOutline
     });
   }
 
@@ -97,7 +101,9 @@ ngOnInit() {
   this.updateCurrentMonthYear();
   this.loadTasksFromAPI();
 }
-
+goToSettings() {
+  this.router.navigate(['/settings']);
+}
 updateCurrentMonthYear() {
   const months = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -212,10 +218,6 @@ generateCalendar() {
     });
   }
 
-  // Refrescar tareas
-  refreshTasks() {
-    this.loadTasksFromAPI();
-  }
 
   
 
