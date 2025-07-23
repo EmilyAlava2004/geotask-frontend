@@ -260,6 +260,7 @@
       flex-direction: column;
       align-items: center;
       gap: 16px;
+      
     }
 
     ion-icon {
@@ -285,17 +286,27 @@
   }
 }
 
-// Estilos para el botón flotante
 ion-fab {
+  // Posicionamiento ajustado para evitar conflicto con tabs
+  bottom: 80px !important; // Aumentado desde el bottom para evitar los tabs
+  right: 16px;
+  z-index: 1000; // Asegurar que esté por encima de otros elementos
+
   ion-fab-button {
     --background: var(--ion-color-primary);
     --color: white;
     --border-radius: 50%;
     --box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.4);
+    width: 56px;
+    height: 56px;
 
     &:hover {
       --box-shadow: 0 6px 20px rgba(var(--ion-color-primary-rgb), 0.6);
       transform: scale(1.1);
+    }
+
+    ion-icon {
+      font-size: 24px;
     }
   }
 }
