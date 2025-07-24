@@ -28,8 +28,8 @@ export class LocationService {
     return this.http.get<Location[]>(this.apiUrl);
   }
   
-  updateLocation(id: number, data: Partial<Location>) {
-  return this.http.put(`http://localhost:3000/api/locations/${id}`, data);
+  updateLocation(id: number, location: Location) {
+  return this.http.put<Location>(`http://localhost:3000/api/locations/${id}`, location);
 }
 
   deleteLocation(id: number) {

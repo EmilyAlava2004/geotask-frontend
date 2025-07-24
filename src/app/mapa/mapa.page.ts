@@ -17,6 +17,8 @@ export class MapaPage implements OnInit {
 
   lastLocationId: number | null = null;
   currentCoords: { lat: number; lng: number } | null = null;
+  nuevasCoords: { lat: number; lng: number } | null = null;
+  map!: mapboxgl.Map;
 
   constructor(private locationService: LocationService) {}
 
@@ -35,30 +37,30 @@ export class MapaPage implements OnInit {
   }
 
   cargarMapa(longitud: number, latitud: number) {
-    const map = new mapboxgl.Map({
-      accessToken: 'pk.eyJ1IjoidGhvbWFza2x6IiwiYSI6ImNsM3VibWJwbTI4emkzZXBlamVjOHp0Z2YifQ.QhFxYxdIC2m4vGlEkMqrow',
-      container: 'map',
-      style: 'mapbox://styles/mapbox/streets-v11',
-      center: [longitud, latitud],
-      zoom: 13,
-    });
+  this.map = new mapboxgl.Map({
+    accessToken: 'pk.eyJ1IjoidGhvbWFza2x6IiwiYSI6ImNsM3VibWJwbTI4emkzZXBlamVjOHp0Z2YifQ.QhFxYxdIC2m4vGlEkMqrow',
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v11',
+    center: [longitud, latitud],
+    zoom: 13,
+  });
+  this.map.on('load', () => this.map.resize());
 
-    map.on('load', () => map.resize());
-    map.addControl(new mapboxgl.NavigationControl());
-    map.addControl(new mapboxgl.FullscreenControl());
-    map.addControl(new mapboxgl.GeolocateControl({
-      positionOptions: { enableHighAccuracy: true },
-      trackUserLocation: true
-    }));
+  this.map.addControl(new mapboxgl.NavigationControl());
+  this.map.addControl(new mapboxgl.FullscreenControl());
+  this.map.addControl(new mapboxgl.GeolocateControl({
+    positionOptions: { enableHighAccuracy: true },
+    trackUserLocation: true
+  }));
+  const el = document.createElement('div');
+  el.className = 'marker';
+  el.style.backgroundImage = 'url(../../assets/icon/placeholder.png)';
+  el.style.width = '32px';
+  el.style.height = '32px';
 
-    const el = document.createElement('div');
-    el.className = 'marker';
-    el.style.backgroundImage = 'url(../../assets/icon/placeholder.png)';
-    el.style.width = '32px';
-    el.style.height = '32px';
+  new mapboxgl.Marker(el).setLngLat([longitud, latitud]).addTo(this.map);
+}
 
-    new mapboxgl.Marker(el).setLngLat([longitud, latitud]).addTo(map);
-  }
 
   guardarUbicacion() {
   if (!this.currentCoords) return;
@@ -89,24 +91,52 @@ export class MapaPage implements OnInit {
   });
 }
 
+  editarUbicacion() {
+  if (!this.lastLocationId) {
+    alert('No hay una ubicación guardada previamente para editar');
+    return;
+  }
+  alert('Haz clic en el mapa para seleccionar la nueva ubicación.');
+  const clickHandler = (e: mapboxgl.MapMouseEvent) => {
+    const { lng, lat } = e.lngLat;
+    this.nuevasCoords = { lat, lng };
+    this.map.off('click', clickHandler); 
 
-  editarUbicacion(id: number) {
-  const nuevoNombre = prompt('Nuevo nombre para la ubicación:');
-  if (!nuevoNombre) return;
-
-  const datosActualizar = { name: nuevoNombre };
-
-  this.locationService.updateLocation(id, datosActualizar).subscribe({
-    next: (res) => {
-      alert('Ubicación actualizada correctamente');
-      console.log('Respuesta update:', res);
-    },
-    error: (err) => {
-      console.error('Error al actualizar ubicación:', err);
-      alert('Error al actualizar ubicación: ' + (err.error?.message || err.message));
+    const nuevoNombre = prompt('Nuevo nombre de la ubicación:', 'Ubicación actualizada');
+    if (!nuevoNombre || nuevoNombre.trim() === '') {
+      alert('Nombre inválido');
+      return;
     }
-  });
+
+    const nuevoRadioStr = prompt('Nuevo radio de geocerca (en metros):', '200');
+    const nuevoRadio = Number(nuevoRadioStr);
+    if (isNaN(nuevoRadio) || nuevoRadio <= 0) {
+      alert('Radio inválido');
+      return;
+    }
+
+    const ubicacionActualizada: Location = {
+      name: nuevoNombre.trim(),
+      latitude: lat,
+      longitude: lng,
+      geofence_radius: nuevoRadio
+    };
+
+    this.locationService.updateLocation(this.lastLocationId!, ubicacionActualizada).subscribe({
+      next: res => {
+        console.log('Ubicación actualizada con éxito:', res);
+        alert('Ubicación actualizada correctamente');
+      },
+      error: err => {
+        console.error('Error al actualizar la ubicación', err);
+        alert('Error al actualizar la ubicación');
+      }
+    });
+  };
+
+  this.map.on('click', clickHandler);
 }
+
 
   eliminarUbicacion() {
   if (!this.lastLocationId) {
