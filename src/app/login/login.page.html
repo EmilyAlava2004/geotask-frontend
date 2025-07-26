@@ -1,0 +1,91 @@
+<!-- login.page.html -->
+<ion-content class="login-content">
+  <div class="login-container">
+    <!-- Header con logo o título -->
+    <div class="header-section">
+      <ion-icon name="person-circle-outline" class="logo-icon"></ion-icon>
+      <h1>Bienvenido</h1>
+      <p>Inicia sesión en tu cuenta</p>
+    </div>
+
+    <!-- Formulario de login -->
+    <form class="login-form" (ngSubmit)="onLogin()">
+      <div class="input-group">
+        <ion-item lines="none" class="custom-input">
+          <ion-icon name="mail-outline" slot="start" class="input-icon"></ion-icon>
+          <ion-input
+            type="email"
+            placeholder="Correo electrónico"
+            [(ngModel)]="email"
+            name="email"
+            required>
+          </ion-input>
+        </ion-item>
+      </div>
+
+      <div class="input-group">
+        <ion-item lines="none" class="custom-input">
+          <ion-icon name="lock-closed-outline" slot="start" class="input-icon"></ion-icon>
+          <ion-input
+            #passwordInput
+            type="password"
+            placeholder="Contraseña"
+            [(ngModel)]="password"
+            name="password"
+            required>
+          </ion-input>
+          <ion-icon 
+            [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" 
+            slot="end" 
+            class="toggle-password"
+            (click)="togglePassword()">
+          </ion-icon>
+        </ion-item>
+      </div>
+
+      <div class="remember-section">
+        <ion-checkbox [(ngModel)]="rememberMe" name="rememberMe"></ion-checkbox>
+        <ion-label>Recordar sesión</ion-label>
+      </div>
+      <!-- Botón de login -->
+      <ion-button 
+        expand="block" 
+        type="submit" 
+        class="login-button"
+        [disabled]="!email || !password">
+        <ion-icon name="log-in-outline" slot="start"></ion-icon>
+        Iniciar Sesión
+      </ion-button>
+    </form>
+
+    <!-- Enlaces adicionales -->
+    <div class="additional-links">
+       <ion-button fill="clear" size="small" (click)="forgotPassword()">
+        ¿Olvidaste tu contraseña?
+      </ion-button>
+      
+      <div class="signup-section">
+        <span>¿No tienes cuenta? </span>
+        <ion-button fill="clear" size="small" (click)="goToSignup()">
+          Regístrate
+        </ion-button>
+      </div>
+    </div>
+
+    <div class="divider">
+      <span>o continúa con</span>
+    </div>
+
+    <div class="social-buttons">
+      <ion-button fill="outline" class="social-btn google-btn" (click)="loginWithGoogle()">
+        <ion-icon name="logo-google" slot="start"></ion-icon>
+        Google
+      </ion-button>
+      
+      <ion-button fill="outline" class="social-btn facebook-btn" (click)="loginWithFacebook()">
+        <ion-icon name="logo-facebook" slot="start"></ion-icon>
+        Facebook
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

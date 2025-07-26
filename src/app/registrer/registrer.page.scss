@@ -1,0 +1,173 @@
+:root {
+  --primary: #667eea;
+  --primary-hover: #5a6fd8;
+  --text: #fff;
+  --muted: rgba(255, 255, 255, 0.8);
+  --bg: linear-gradient(135deg, #171718, #343336);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --text: #000;
+    --muted: rgba(0, 0, 0, 0.7);
+    --bg: linear-gradient(135deg, #f5f5f5, #ddd);
+  }
+}
+
+.signup-content {
+  --background: var(--bg);
+  --padding-start: 20px;
+  --padding-end: 20px;
+}
+
+.signup-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  max-width: 400px;
+  margin: auto;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 24px;
+
+  .logo-icon {
+    font-size: 60px;
+    color: var(--text);
+  }
+
+  h1 {
+    color: var(--text);
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  p {
+    color: var(--muted);
+    font-size: 14px;
+  }
+}
+
+.input-group {
+  margin-bottom: 14px;
+
+  .custom-input {
+    --background: rgba(57, 56, 56, 0.9);
+    --padding-start: 16px;
+    --border-radius: 10px;
+    ion-input {
+      --color: #f0f0f0;
+      --placeholder-color: #ccc;
+      font-size: 15px;
+    }
+
+    .toggle-password,
+    .input-icon {
+      font-size: 18px;
+      color: #ccc;
+    }
+  }
+}
+
+.terms-section {
+  display: flex;
+  align-items: flex-start;
+  font-size: 13px;
+  margin-bottom: 20px;
+
+  ion-checkbox {
+    margin-right: 10px;
+  }
+
+  .terms-link {
+    color: var(--primary);
+    text-decoration: underline;
+  }
+}
+
+.signup-button {
+  --background: linear-gradient(45deg, var(--primary), #764ba2);
+  --border-radius: 10px;
+  --color: var(--text);
+  height: 48px;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.additional-links {
+  text-align: center;
+  font-size: 14px;
+
+  .login-section {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+
+    ion-button {
+      --color: var(--primary);
+    }
+  }
+}
+
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 20px 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  span {
+    background: transparent;
+    padding: 0 12px;
+    position: relative;
+    z-index: 1;
+    color: var(--muted);
+    font-size: 13px;
+  }
+}
+
+.social-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .social-btn {
+    --border-radius: 10px;
+    --color: var(--text);
+    height: 44px;
+    font-size: 14px;
+
+    &.google-btn {
+      --border-color: rgba(219, 68, 55, 0.8);
+      --background: rgba(219, 68, 55, 0.1);
+    }
+
+    &.facebook-btn {
+      --border-color: rgba(66, 103, 178, 0.8);
+      --background: rgba(66, 103, 178, 0.1);
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

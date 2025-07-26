@@ -1,0 +1,329 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{modalTitle}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()" fill="clear">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="add-task-content">
+  <div class="form-container">
+    
+    <!-- Información básica -->
+    <ion-card class="form-section">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="document-text-outline"></ion-icon>
+          Información Básica
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="stacked">Título *</ion-label>
+          <ion-input 
+            [(ngModel)]="taskForm.title"
+            (ionInput)="onFormChange()"
+            placeholder="Ingresa el título de la tarea"
+            maxlength="100">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Descripción *</ion-label>
+          <ion-textarea 
+            [(ngModel)]="taskForm.description"
+            (ionInput)="onFormChange()"
+            placeholder="Describe la tarea en detalle"
+            rows="3"
+            maxlength="250">
+          </ion-textarea>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Categoría y Prioridad -->
+    <ion-card class="form-section">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="pricetag-outline"></ion-icon>
+          Categoría y Prioridad
+          <ion-button 
+            fill="clear" 
+            size="small" 
+            (click)="toggleCategoryForm()"
+            class="add-category-btn">
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            Nueva
+          </ion-button>
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="6">
+              <ion-item>
+                <ion-label position="stacked">Categoría *</ion-label>
+                
+                <!-- Loading spinner para categorías -->
+                <div *ngIf="isLoadingCategories" class="loading-container">
+                  <ion-spinner name="crescent"></ion-spinner>
+                  <ion-label>Cargando categorías...</ion-label>
+                </div>
+                
+                <!-- Select de categorías -->
+                <ion-select 
+                  *ngIf="!isLoadingCategories"
+                  [(ngModel)]="taskForm.category_id"
+                  (ionChange)="onFormChange()"
+                  placeholder="Selecciona una categoría">
+                  <ion-select-option 
+                    *ngFor="let category of categories" 
+                    [value]="category.id">
+                    {{category.name}}
+                  </ion-select-option>
+                </ion-select>
+                
+                <!-- Botón para recargar categorías en caso de error -->
+                <ion-button 
+                  *ngIf="categoriesError && !isLoadingCategories"
+                  fill="clear" 
+                  size="small"
+                  (click)="reloadCategories()">
+                  <ion-icon name="refresh-outline" slot="start"></ion-icon>
+                  Reintentar
+                </ion-button>
+              </ion-item>
+            </ion-col>
+            <ion-col size="6">
+              <ion-item>
+                <ion-label position="stacked">Prioridad</ion-label>
+                <ion-select 
+                  [(ngModel)]="taskForm.priority"
+                  (ionChange)="onFormChange()">
+                  <ion-select-option *ngFor="let priority of priorities" [value]="priority.value">
+                    {{priority.label}}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+        <!-- Vista previa mejorada -->
+        <div class="preview-section">
+          <ion-chip [color]="getPriorityColor(taskForm.priority)">
+            <ion-icon name="flag-outline"></ion-icon>
+            <ion-label>{{getPriorityLabel(taskForm.priority)}}</ion-label>
+          </ion-chip>
+          
+          <ion-chip [color]="getCategoryColor(taskForm.category_id)">
+            <ion-icon [name]="getCategoryIcon(taskForm.category_id)"></ion-icon>
+            <ion-label>{{getCategoryName(taskForm.category_id)}}</ion-label>
+          </ion-chip>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Ubicación -->
+    <ion-card class="form-section">
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="stacked">Ubicación</ion-label>
+          <ion-input 
+            [value]="selectedLocation?.name || 'Sin ubicación'"
+            placeholder="Selecciona una ubicación"
+            readonly>
+          </ion-input>
+          <ion-button 
+            slot="end" 
+            fill="clear" 
+            (click)="toggleLocationSearch()">
+            <ion-icon name="map-outline"></ion-icon>
+          </ion-button>
+        </ion-item>
+
+        <ion-item *ngIf="selectedLocation?.address">
+          <ion-label>
+            <p>{{selectedLocation?.address}}</p>
+          </ion-label>
+        </ion-item>
+
+        <!-- Búsqueda de ubicaciones -->
+        <div *ngIf="showLocationSearch" class="location-search">
+          <ion-searchbar 
+            placeholder="Buscar ubicación..."
+            (ionInput)="onLocationSearch($event)">
+          </ion-searchbar>
+          
+          <ion-list *ngIf="locationResults.length > 0">
+            <ion-item 
+              *ngFor="let location of locationResults"
+              (click)="selectLocation(location)"
+              button>
+              <ion-icon name="location-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>{{location.name}}</h3>
+                <p>{{location.address}}</p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+
+          <ion-item *ngIf="locationResults.length === 0 && !isSearchingLocation" button (click)="selectLocation({name: 'Sin ubicación', address: '', latitude: 0, longitude: 0})">
+            <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Sin ubicación</h3>
+              <p>No asignar ubicación a esta tarea</p>
+            </ion-label>
+          </ion-item>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Fecha de vencimiento -->
+    <ion-card class="form-section">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="time-outline"></ion-icon>
+          Fecha de Vencimiento
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-datetime 
+            name="dueDate"
+            [(ngModel)]="taskForm.dueDate"
+            (ionChange)="onFormChange()"
+            [min]="minDate"
+            placeholder="Selecciona una fecha">
+          </ion-datetime>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+  </div>
+
+  <!-- Botones de acción -->
+  <div class="action-buttons">
+    <ion-button 
+      expand="block" 
+      (click)="createTask()"
+      [disabled]="!isFormValid"
+      color="primary">
+      <ion-icon [name]="buttonIcon" slot="start"></ion-icon>
+      {{buttonText}}
+    </ion-button>
+    
+    <ion-button 
+      expand="block" 
+      fill="clear" 
+      (click)="cancel()">
+      Cancelar
+    </ion-button>
+  </div>
+
+  <!-- Sección Flotante para Crear Categorías -->
+  <div class="floating-category-section" [class.show]="showCategoryForm">
+    <div class="floating-overlay" (click)="toggleCategoryForm()"></div>
+    <div class="floating-card">
+      <div class="floating-header">
+        <h3>
+          <ion-icon name="create-outline"></ion-icon>
+          Nueva Categoría
+        </h3>
+        <ion-button fill="clear" size="small" (click)="toggleCategoryForm()">
+          <ion-icon name="close"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="floating-content">
+        <!-- Nombre de la categoría -->
+        <ion-item>
+          <ion-label position="stacked">Nombre *</ion-label>
+          <ion-input 
+            [(ngModel)]="newCategory.name"
+            placeholder="Ej: Trabajo, Personal, Hogar..."
+            maxlength="30"
+            counter="true">
+          </ion-input>
+        </ion-item>
+
+        <!-- Selector de íconos -->
+        <ion-item>
+          <ion-label position="stacked">Ícono</ion-label>
+          <div class="icon-selector">
+            <div 
+              *ngFor="let icon of availableIcons" 
+              class="icon-option"
+              [class.selected]="newCategory.icon === icon.value"
+              (click)="newCategory.icon = icon.value">
+              <ion-icon [name]="icon.value"></ion-icon>
+              <span>{{icon.label}}</span>
+            </div>
+          </div>
+        </ion-item>
+
+        <!-- Selector de colores -->
+        <ion-item>
+          <ion-label position="stacked">Color</ion-label>
+          <div class="color-selector">
+            <div 
+              *ngFor="let color of availableColors" 
+              class="color-option"
+              [class.selected]="newCategory.color === color.value"
+              (click)="newCategory.color = color.value"
+              [style.background-color]="color.hex">
+              <ion-icon 
+                name="checkmark-outline" 
+                *ngIf="newCategory.color === color.value">
+              </ion-icon>
+            </div>
+          </div>
+        </ion-item>
+
+        <!-- Vista previa -->
+        <div class="category-preview" *ngIf="newCategory.name.trim()">
+          <ion-label>Vista previa:</ion-label>
+          <ion-chip [color]="newCategory.color">
+            <ion-icon [name]="newCategory.icon"></ion-icon>
+            <ion-label>{{newCategory.name}}</ion-label>
+          </ion-chip>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="floating-actions">
+          <ion-button 
+            expand="block" 
+            (click)="createCategory()"
+            [disabled]="!validateCategoryForm() || isCreatingCategory"
+            color="primary">
+            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+            <span *ngIf="!isCreatingCategory">Crear Categoría</span>
+            <ion-spinner name="crescent" *ngIf="isCreatingCategory"></ion-spinner>
+          </ion-button>
+          
+          <ion-button 
+            expand="block" 
+            fill="clear" 
+            (click)="toggleCategoryForm()"
+            [disabled]="isCreatingCategory">
+            Cancelar
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</ion-content>
+
+<!-- Toast para mensajes mejorado -->
+<ion-toast
+  [isOpen]="showToast"
+  [message]="toastMessage"
+  duration="3000"
+  position="top"
+  [color]="toastColor"
+  (didDismiss)="onToastDidDismiss()">
+</ion-toast>
