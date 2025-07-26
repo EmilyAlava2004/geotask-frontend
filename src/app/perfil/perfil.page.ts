@@ -3,14 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons } from '@ionic/angular/standalone';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { 
-  IonButton, 
-  IonIcon, 
-  IonAvatar, 
-  IonItem, 
-  IonLabel, 
-  IonInput, 
-  IonToggle, 
+
+
+import { UserService } from '../services/user.service';
+
+import {
+  IonButton,
+  IonIcon,
+  IonAvatar,
+  IonItem,
+  IonLabel,
+  IonInput,
+  IonToggle,
   IonSpinner,
   AlertController,
   ToastController,
@@ -19,17 +23,18 @@ import {
   LoadingController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { 
-  create, 
-  checkmark, 
-  camera, 
-  person, 
-  settings, 
-  location, 
-  save, 
-  close, 
-  key, 
-  download, 
+
+import {
+  create,
+  checkmark,
+  camera,
+  person,
+  settings,
+  location,
+  save,
+  close,
+  key,
+  download,
   logOut,
   chevronForward
 } from 'ionicons/icons';
@@ -86,10 +91,11 @@ interface TaskStats {
 })
 export class PerfilPage implements OnInit {
 
- profileForm: FormGroup;
+
+  profileForm: FormGroup;
   isEditMode = false;
   isLoading = false;
-  
+
   // Datos del usuario
   user: User = {
     id: '1',
@@ -111,14 +117,19 @@ export class PerfilPage implements OnInit {
       notificationRadius: 500
     }
   };
-  
+
   // Estadísticas de tareas
   taskStats: TaskStats = {
     total: 25,
     completed: 18,
     pending: 7
   };
-  
+
+
+  personid: any;
+  profile: any = {};
+  userData : any = {};
+
   // Backup de datos originales
   private originalUserData: User;
 
@@ -128,8 +139,11 @@ export class PerfilPage implements OnInit {
     private toastController: ToastController,
     private actionSheetController: ActionSheetController,
     private modalController: ModalController,
-    private loadingController: LoadingController
+
+    private loadingController: LoadingController,
+    private userService: UserService
   ) {
+     this.personid = localStorage.getItem('id');
     // Registrar iconos
     addIcons({
       create,
@@ -145,7 +159,7 @@ export class PerfilPage implements OnInit {
       'log-out': logOut,
       'chevron-forward': chevronForward
     });
-    
+
     // Inicializar formulario
     this.profileForm = this.formBuilder.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
@@ -157,24 +171,59 @@ export class PerfilPage implements OnInit {
       offlineMode: [false],
       notificationRadius: [500, [Validators.min(50), Validators.max(2000)]]
     });
-    
+
     // Guardar datos originales
     this.originalUserData = JSON.parse(JSON.stringify(this.user));
   }
 
+
+
   ngOnInit() {
-    this.loadUserData();
     this.loadTaskStats();
+    this.viewProfile();
   }
+viewProfile() {
+  if (!this.personid) {
+    console.error('No hay ID de usuario en localStorage');
+    return;
+  }
+
+  this.userService.getOneUser(this.personid).subscribe({
+    next: (data: any) => {
+      this.profile = data;
+
+      const userData = this.profile.user;
+
+      // Guardamos los datos reales en el objeto user
+      this.user = {
+        ...this.user,
+        id: userData.id,
+        name: userData.user, // Ojo: el backend lo envía como "user"
+        email: userData.email,
+        phone: userData.numero,
+      };
+
+      // Hacemos backup para el cancelEdit()
+      this.originalUserData = JSON.parse(JSON.stringify(this.user));
+
+      // Actualizamos el formulario con los datos obtenidos
+      this.profileForm.patchValue({
+        name: this.user.name,
+        email: this.user.email,
+        phone: this.user.phone,
+      });
+    },
+    error: () => {
+      console.error('Error al cargar el perfil');
+    },
+  });
+}
+
+
 
   /**
    * Cargar datos del usuario
    */
-  private loadUserData() {
-    // Aquí normalmente harías una llamada al servicio de autenticación
-    // Por ahora usamos datos mockeados
-    this.updateFormWithUserData();
-  }
 
   /**
    * Actualizar formulario con datos del usuario
@@ -195,7 +244,7 @@ export class PerfilPage implements OnInit {
       // Aquí normalmente harías una llamada al servicio de tareas
       // Por ahora usamos datos mockeados
       await this.delay(1000); // Simular carga
-      
+
       this.taskStats = {
         total: 25,
         completed: 18,
@@ -227,11 +276,12 @@ export class PerfilPage implements OnInit {
     }
 
     this.isLoading = true;
-    
+
+
     try {
       // Simular llamada a la API
       await this.delay(2000);
-      
+
       // Actualizar datos del usuario
       const formData = this.profileForm.value;
       this.user = {
@@ -240,13 +290,14 @@ export class PerfilPage implements OnInit {
         email: formData.email,
         phone: formData.phone,
       };
-      
+
+
       // Actualizar backup
       this.originalUserData = JSON.parse(JSON.stringify(this.user));
-      
+
       this.isEditMode = false;
       await this.showToast('Perfil actualizado correctamente', 'success');
-      
+
     } catch (error) {
       console.error('Error updating profile:', error);
       await this.showToast('Error al actualizar el perfil', 'danger');
@@ -292,7 +343,6 @@ export class PerfilPage implements OnInit {
         }
       ]
     });
-    
     await actionSheet.present();
   }
 
@@ -342,7 +392,6 @@ export class PerfilPage implements OnInit {
               message: 'Enviando enlace...'
             });
             await loading.present();
-            
             try {
               await this.delay(2000);
               await this.showToast('Enlace enviado a tu email', 'success');
@@ -355,11 +404,10 @@ export class PerfilPage implements OnInit {
         }
       ]
     });
-    
+
     await alert.present();
   }
 
- 
 
   /**
    * Cerrar sesión
@@ -380,20 +428,21 @@ export class PerfilPage implements OnInit {
               message: 'Cerrando sesión...'
             });
             await loading.present();
-            
+
             try {
               await this.delay(1500);
-              
+
               // Aquí implementarías la lógica de logout
               // Por ejemplo, limpiar tokens, storage local, etc.
               localStorage.clear();
               sessionStorage.clear();
-              
+
+
               await this.showToast('Sesión cerrada correctamente', 'success');
-              
+
               // Navegar a la página de login
               // this.router.navigate(['/auth/login']);
-              
+
             } catch (error) {
               console.error('Error during logout:', error);
               await this.showToast('Error al cerrar sesión', 'danger');
@@ -404,7 +453,8 @@ export class PerfilPage implements OnInit {
         }
       ]
     });
-    
+
+
     await alert.present();
   }
 
@@ -424,7 +474,6 @@ export class PerfilPage implements OnInit {
         }
       ]
     });
-    
     await toast.present();
   }
 
@@ -443,7 +492,9 @@ export class PerfilPage implements OnInit {
     return (
       formData.name !== this.originalUserData.name ||
       formData.email !== this.originalUserData.email ||
-      formData.phone !== this.originalUserData.phone 
+
+      formData.phone !== this.originalUserData.phone
+
     );
   }
 
@@ -452,7 +503,7 @@ export class PerfilPage implements OnInit {
    */
   getFieldErrorMessage(fieldName: string): string {
     const field = this.profileForm.get(fieldName);
-    
+
     if (field?.errors && field.touched) {
       if (field.errors['required']) {
         return 'Este campo es requerido';
@@ -473,7 +524,7 @@ export class PerfilPage implements OnInit {
         return `Valor máximo: ${field.errors['max'].max}`;
       }
     }
-    
+
     return '';
   }
 
@@ -490,17 +541,18 @@ export class PerfilPage implements OnInit {
    */
   formatPhoneNumber(phone: string): string {
     if (!phone) return '';
-    
+
+
     // Remover caracteres no numéricos excepto +
     const cleaned = phone.replace(/[^\d+]/g, '');
-    
+
     // Aplicar formato básico
     if (cleaned.startsWith('+')) {
       return cleaned;
     } else if (cleaned.length === 10) {
       return `+1 ${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6)}`;
     }
-    
+
     return cleaned;
   }
 
@@ -517,7 +569,7 @@ export class PerfilPage implements OnInit {
    */
   getProgressColor(): string {
     const percentage = this.getCompletionPercentage();
-    
+
     if (percentage >= 80) return 'success';
     if (percentage >= 60) return 'warning';
     return 'danger';
@@ -531,5 +583,4 @@ export class PerfilPage implements OnInit {
     this.updateFormWithUserData();
   }
 
-  
 }

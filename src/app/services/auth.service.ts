@@ -11,7 +11,6 @@ export class AuthService {
   private API_URL = 'http://localhost:3000/api';
 
   constructor(private http: HttpClient) {}
-
   async authenticateUser(
     email: string,
     password: string
