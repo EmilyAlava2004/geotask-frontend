@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons } from '@ionic/angular/standalone';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-
+import { Router } from '@angular/router';
 
 import { UserService } from '../services/user.service';
 
@@ -134,6 +134,7 @@ export class PerfilPage implements OnInit {
   private originalUserData: User;
 
   constructor(
+    private router: Router,
     private formBuilder: FormBuilder,
     private alertController: AlertController,
     private toastController: ToastController,
@@ -181,8 +182,7 @@ export class PerfilPage implements OnInit {
   ngOnInit() {
     this.loadTaskStats();
     this.viewProfile();
-  }
-viewProfile() {
+  }viewProfile() {
   if (!this.personid) {
     console.error('No hay ID de usuario en localStorage');
     return;
@@ -190,17 +190,21 @@ viewProfile() {
 
   this.userService.getOneUser(this.personid).subscribe({
     next: (data: any) => {
-      this.profile = data;
+      if (!data?.user) {
+        console.error('La respuesta del backend no contiene un objeto user válido');
+        return;
+      }
 
+      this.profile = data;
       const userData = this.profile.user;
 
       // Guardamos los datos reales en el objeto user
       this.user = {
         ...this.user,
         id: userData.id,
-        name: userData.user, // Ojo: el backend lo envía como "user"
-        email: userData.email,
-        phone: userData.numero,
+        name: userData.user || '', // Asegúrate que "user" es una propiedad del backend
+        email: userData.email || '',
+        phone: userData.numero || '',
       };
 
       // Hacemos backup para el cancelEdit()
@@ -218,6 +222,7 @@ viewProfile() {
     },
   });
 }
+
 
 
 
@@ -439,7 +444,7 @@ viewProfile() {
 
 
               await this.showToast('Sesión cerrada correctamente', 'success');
-
+              this.router.navigate(['/login']);
               // Navegar a la página de login
               // this.router.navigate(['/auth/login']);
 

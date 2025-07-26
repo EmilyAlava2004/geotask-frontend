@@ -1,15 +1,15 @@
-// src/app/interface/Itask.interface.ts
+// src/app/interface/Itask.interface.ts - Versión mejorada
 
 export interface Task {
   id?: number;
   title: string;
   description: string;
-  date: string; // DATEONLY en el backend
+  date: string; // Formato YYYY-MM-DD (DATEONLY en el backend)
   status: 'pending' | 'in-progress' | 'completed';
   priority: 'low' | 'medium' | 'high';
+  category: 'Work' | 'Personal' | 'Study' | 'Urgent' | 'Health' | 'other';
   user_id: number;
-  category_id?: number | undefined;
-  location_id?: number | undefined;
+  location_id?: number | null; // Cambiado de undefined a null
   createdAt?: string;
   updatedAt?: string;
   
@@ -19,16 +19,13 @@ export interface Task {
     name: string;
     email: string;
   };
-  Category?: {
-    id: number;
-    name: string;
-  };
   Location?: {
     id: number;
     name: string;
-    address: string;
+    address?: string;
     latitude: number;
     longitude: number;
+    geofence_radius?: number;
   };
 }
 
@@ -36,7 +33,20 @@ export interface Task {
 export interface Location {
   id?: number;
   name: string;
-  address: string;
+  address?: string;
   latitude: number;
   longitude: number;
+  geofence_radius?: number;
+}
+
+// Interface para el payload de creación/actualización de tareas
+export interface TaskPayload {
+  title: string;
+  description: string;
+  date: string;
+  status?: 'pending' | 'in-progress' | 'completed';
+  priority?: 'low' | 'medium' | 'high';
+  category: 'Work' | 'Personal' | 'Study' | 'Urgent' | 'Health' | 'other';
+  user_id: number;
+  location_id?: number | null;
 }

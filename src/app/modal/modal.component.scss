@@ -30,20 +30,14 @@
       }
     }
     
-    .preview-section {
-      display: flex;
-      gap: 8px;
-      margin-top: 16px;
-      flex-wrap: wrap;
-      
-      ion-chip {
-        --background: var(--ion-color-light);
-        
-        ion-icon {
-          font-size: 0.9rem;
-        }
-      }
-    }
+   .preview-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  justify-content: flex-start;
+}
+
     
     .loading-container {
       display: flex;

@@ -178,7 +178,7 @@ goToSettings() {
       description: task.description || 'Sin descripción',
       status: this.mapApiStatusToDisplay(task.status),
       priority: this.mapApiPriorityToDisplay(task.priority),
-      category: task.Category?.name || 'Sin categoría',
+      category: task.category|| 'Sin categoría',
 
       location: {
         name: task.Location?.name || 'Ubicación no asignada',
