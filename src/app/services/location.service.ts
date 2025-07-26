@@ -1,4 +1,3 @@
-// src/app/services/location.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -16,7 +15,7 @@ export interface Location {
   providedIn: 'root'
 })
 export class LocationService {
-  private apiUrl = 'http://localhost:3000/api/locations'; // Ajusta si cambia el endpoint
+  private apiUrl = 'http://localhost:3000/api/locations';
 
   constructor(private http: HttpClient) {}
 
@@ -28,12 +27,15 @@ export class LocationService {
     return this.http.get<Location[]>(this.apiUrl);
   }
   
+  getAllLocations(): Observable<Location[]> {
+  return this.http.get<Location[]>(`http://localhost:3000/api/locations`);
+}
+
   updateLocation(id: number, location: Location) {
   return this.http.put<Location>(`http://localhost:3000/api/locations/${id}`, location);
 }
 
   deleteLocation(id: number) {
-  return this.http.delete(`http://localhost:3000/api/locations/${id}`);
-  }
-
+  return this.http.delete(`${this.apiUrl}/${id}`);
+}
 }
