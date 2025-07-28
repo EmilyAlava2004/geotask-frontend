@@ -36,7 +36,8 @@ import {
   key,
   download,
   logOut,
-  chevronForward
+  chevronForward,
+  personCircleOutline
 } from 'ionicons/icons';
 
 interface User {
@@ -158,7 +159,8 @@ export class PerfilPage implements OnInit {
       key,
       download,
       'log-out': logOut,
-      'chevron-forward': chevronForward
+      'chevron-forward': chevronForward,
+      personCircleOutline
     });
 
     // Inicializar formulario

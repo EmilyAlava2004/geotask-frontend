@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NavController, ToastController, LoadingController, AlertController, ActionSheetController } from '@ionic/angular';
 //import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { FormsModule } from '@angular/forms';
+import { StorageService } from '../services/storage.service';
 import { 
   IonHeader, 
   IonIcon, 
@@ -23,7 +24,7 @@ import {
   IonSelect,
   IonSelectOption,
   IonRange,
-  IonNote
+  IonNote,
 } from "@ionic/angular/standalone";
 
 @Component({
@@ -45,10 +46,8 @@ import {
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonAvatar,
     IonItem,
     IonLabel,
-    IonInput,
     IonToggle,
     IonSelect,
     IonSelectOption,
@@ -57,15 +56,6 @@ import {
   ]
 })
 export class SettingsPage implements OnInit {
-
-
-
-  // Configuración del usuario
-  userProfile = {
-    name: '',
-    email: '',
-    avatar: 'https://via.placeholder.com/80'
-  };
 
   // Configuración de notificaciones
   notifications = {
@@ -109,7 +99,7 @@ export class SettingsPage implements OnInit {
     private toastCtrl: ToastController,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
-    private actionSheetCtrl: ActionSheetController
+    private storageService: StorageService 
   ) { }
 
   ngOnInit() {
@@ -117,160 +107,53 @@ export class SettingsPage implements OnInit {
   }
 
   // Cargar configuraciones guardadas
-  loadSettings() {
-    // Aquí cargarías las configuraciones desde tu servicio/storage
-    const savedSettings = localStorage.getItem('appSettings');
-    if (savedSettings) {
-      const settings = JSON.parse(savedSettings);
-      Object.assign(this, settings);
-    }
+  async loadSettings() {
+  const savedSettings = await this.storageService.get('appSettings');
+  if (savedSettings) {
+    Object.assign(this, savedSettings);
+    this.applyTheme(this.appSettings.theme); // si estás usando temas
+    console.log('Configuración cargada:', savedSettings);
   }
+}
 
-  // Guardar configuraciones
-  async saveSettings() {
-    const loading = await this.loadingCtrl.create({
-      message: 'Guardando configuración...',
-      duration: 1000
+async saveSettings() {
+  const loading = await this.loadingCtrl.create({
+    message: 'Guardando configuración...',
+    duration: 1000
+  });
+  await loading.present();
+
+  try {
+    const allSettings = {
+      notifications: this.notifications,
+      mapSettings: this.mapSettings,
+      syncSettings: this.syncSettings,
+      securitySettings: this.securitySettings,
+      appSettings: this.appSettings
+    };
+
+    await this.storageService.set('appSettings', allSettings);
+console.log('Configuración guardada:', allSettings); 
+    this.applyTheme(this.appSettings.theme); // si aplica
+
+    const toast = await this.toastCtrl.create({
+      message: 'Configuración guardada exitosamente',
+      duration: 2000,
+      color: 'success',
+      position: 'bottom'
     });
-    await loading.present();
+    await toast.present();
 
-    try {
-      // Simular guardado
-      const allSettings = {
-        userProfile: this.userProfile,
-        notifications: this.notifications,
-        mapSettings: this.mapSettings,
-        syncSettings: this.syncSettings,
-        securitySettings: this.securitySettings,
-        appSettings: this.appSettings
-      };
-
-      localStorage.setItem('appSettings', JSON.stringify(allSettings));
-
-      const toast = await this.toastCtrl.create({
-        message: 'Configuración guardada exitosamente',
-        duration: 2000,
-        color: 'success',
-        position: 'bottom'
-      });
-      await toast.present();
-
-    } catch (error) {
-      const toast = await this.toastCtrl.create({
-        message: 'Error al guardar la configuración',
-        duration: 2000,
-        color: 'danger',
-        position: 'bottom'
-      });
-      await toast.present();
-    }
-  }
-
-  // Cambiar avatar
-  /*async changeAvatar() {
-    const actionSheet = await this.actionSheetCtrl.create({
-      header: 'Seleccionar imagen',
-      buttons: [
-        {
-          text: 'Cámara',
-          icon: 'camera',
-          handler: () => {
-            this.selectImage(CameraSource.Camera);
-          }
-        },
-        {
-          text: 'Galería',
-          icon: 'images',
-          handler: () => {
-            this.selectImage(CameraSource.Photos);
-          }
-        },
-        {
-          text: 'Cancelar',
-          icon: 'close',
-          role: 'cancel'
-        }
-      ]
+  } catch (error) {
+    const toast = await this.toastCtrl.create({
+      message: 'Error al guardar la configuración',
+      duration: 2000,
+      color: 'danger',
+      position: 'bottom'
     });
-    await actionSheet.present();
+    await toast.present();
   }
-
-  // Seleccionar imagen
-  async selectImage(source: CameraSource) {
-    try {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: true,
-        resultType: CameraResultType.DataUrl,
-        source: source
-      });
-
-      this.userProfile.avatar = image.dataUrl || '';
-    } catch (error) {
-      console.error('Error selecting image:', error);
-    }
-  }
-*/
-  // Cambiar contraseña
-  async changePassword() {
-    const alert = await this.alertCtrl.create({
-      header: 'Cambiar Contraseña',
-      inputs: [
-        {
-          name: 'currentPassword',
-          type: 'password',
-          placeholder: 'Contraseña actual'
-        },
-        {
-          name: 'newPassword',
-          type: 'password',
-          placeholder: 'Nueva contraseña'
-        },
-        {
-          name: 'confirmPassword',
-          type: 'password',
-          placeholder: 'Confirmar contraseña'
-        }
-      ],
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Actualizar',
-          handler: (data) => {
-            if (data.newPassword !== data.confirmPassword) {
-              this.showToast('Las contraseñas no coinciden', 'danger');
-              return false;
-            }
-            this.updatePassword(data);
-            return true;
-          }
-        }
-      ]
-    });
-    await alert.present();
-  }
-
-  // Actualizar contraseña
-  async updatePassword(passwords: any) {
-    const loading = await this.loadingCtrl.create({
-      message: 'Actualizando contraseña...'
-    });
-    await loading.present();
-
-    try {
-      // Aquí implementarías la lógica para cambiar la contraseña
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      await loading.dismiss();
-      this.showToast('Contraseña actualizada exitosamente', 'success');
-    } catch (error) {
-      await loading.dismiss();
-      this.showToast('Error al actualizar la contraseña', 'danger');
-    }
-  }
+}
 
   // Sincronizar ahora
   async forceSyncNow() {
@@ -307,6 +190,7 @@ export class SettingsPage implements OnInit {
           handler: async () => {
             const loading = await this.loadingCtrl.create({
               message: 'Limpiando caché...'
+              
             });
             await loading.present();
 
@@ -315,6 +199,7 @@ export class SettingsPage implements OnInit {
               await new Promise(resolve => setTimeout(resolve, 2000));
               
               await loading.dismiss();
+              await this.storageService.clear();
               this.showToast('Caché limpiado exitosamente', 'success');
             } catch (error) {
               await loading.dismiss();
@@ -325,6 +210,7 @@ export class SettingsPage implements OnInit {
       ]
     });
     await alert.present();
+    
   }
 
   // Mostrar información de la app
@@ -332,42 +218,13 @@ export class SettingsPage implements OnInit {
     const alert = await this.alertCtrl.create({
       header: 'Acerca de GeoTask Manager',
       message: `
-        <p><strong>Versión:</strong> ${this.appInfo.version}</p>
-        <p><strong>Desarrollado por:</strong> Tu Empresa</p>
-        <p><strong>Descripción:</strong> Aplicación para gestión de tareas georreferenciadas</p>
+        "GeoTask Manager" es una aplicación móvil empresarial que revoluciona la gestión de tareas mediante la integración inteligente de geolocalización. Esta solución permite a usuarios profesionales, equipos de trabajo remoto y empresas con operaciones geográficamente distribuidas optimizar su productividad vinculando tareas específicas a ubicaciones del mundo real.
       `,
       buttons: ['Cerrar']
     });
     await alert.present();
   }
 
-  // Cerrar sesión
-  async logout() {
-    const alert = await this.alertCtrl.create({
-      header: 'Cerrar Sesión',
-      message: '¿Estás seguro de que quieres cerrar sesión?',
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Cerrar Sesión',
-          handler: () => {
-            // Aquí implementarías la lógica de logout
-            localStorage.clear();
-            this.navCtrl.navigateRoot('/login');
-          }
-        }
-      ]
-    });
-    await alert.present();
-  }
-
-  // Ver configuraciones de notificaciones
-  openNotificationsPage() {
-    this.navCtrl.navigateForward('/notifications-settings');
-  }
 
   // Actualizar valor del radio de proximidad
   onProximityRadiusChange(event: any) {
@@ -388,5 +245,9 @@ export class SettingsPage implements OnInit {
       position: 'bottom'
     });
     await toast.present();
+  }
+
+  applyTheme(theme: string) {
+    document.body.classList.toggle('dark', theme === 'dark');
   }
 }

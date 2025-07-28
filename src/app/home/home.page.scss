@@ -1,3 +1,40 @@
+// Forzar modo claro globalmente
+:root {
+  --ion-background-color: #ffffff;
+  --ion-background-color-rgb: 255, 255, 255;
+  --ion-text-color: #000000;
+  --ion-text-color-rgb: 0, 0, 0;
+  --ion-color-step-50: #f2f2f2;
+  --ion-color-step-100: #e6e6e6;
+  --ion-color-step-150: #d9d9d9;
+  --ion-color-step-200: #cccccc;
+  --ion-color-step-250: #bfbfbf;
+  --ion-color-step-300: #b3b3b3;
+  --ion-color-step-350: #a6a6a6;
+  --ion-color-step-400: #999999;
+  --ion-color-step-450: #8c8c8c;
+  --ion-color-step-500: #808080;
+  --ion-color-step-550: #737373;
+  --ion-color-step-600: #666666;
+  --ion-color-step-650: #595959;
+  --ion-color-step-700: #4d4d4d;
+  --ion-color-step-750: #404040;
+  --ion-color-step-800: #333333;
+  --ion-color-step-850: #262626;
+  --ion-color-step-900: #1a1a1a;
+  --ion-color-step-950: #0d0d0d;
+}
+
+// Forzar fondo blanco en el cuerpo de la aplicación
+ion-app {
+  background-color: #ffffff !important;
+}
+
+ion-content {
+  --background: #ffffff !important;
+  --color: #000000 !important;
+}
+
 ion-header {
   ion-toolbar {
     --background: #ffffff;
@@ -52,8 +89,6 @@ ion-header {
   }
 }
 
-
-
 // Responsive para tablets y desktop
 @media (min-width: 768px) {
   ion-header {
@@ -81,6 +116,7 @@ ion-header {
     }
   }
 }
+
 // Estilos para las estadísticas
 .stats-container {
   display: grid;
@@ -92,9 +128,11 @@ ion-header {
     margin: 0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     border-radius: 12px;
+    background-color: #ffffff !important;
 
     ion-card-content {
       padding: 12px;
+      background-color: #ffffff !important;
     }
 
     .stat-content {
@@ -105,6 +143,7 @@ ion-header {
       ion-icon {
         font-size: 24px;
         min-width: 24px;
+        color: #666666 !important;
       }
 
       div {
@@ -115,13 +154,13 @@ ion-header {
           margin: 0;
           font-size: 1.2rem;
           font-weight: bold;
-          color: var(--ion-color-dark);
+          color: #000000 !important;
         }
 
         p {
           margin: 0;
           font-size: 0.8rem;
-          color: var(--ion-color-medium);
+          color: #666666 !important;
         }
       }
     }
@@ -133,6 +172,7 @@ ion-header {
   margin: 0 0 16px 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 16px;
+  background-color: #ffffff !important;
 
   .calendar-header {
     display: flex;
@@ -148,11 +188,13 @@ ion-header {
     ion-button {
       --padding-start: 8px;
       --padding-end: 8px;
+      --color: #000000 !important;
     }
   }
 
   ion-card-content {
     padding: 16px;
+    background-color: #ffffff !important;
   }
 
   .calendar-weekdays {
@@ -165,7 +207,7 @@ ion-header {
       text-align: center;
       font-size: 0.8rem;
       font-weight: 600;
-      color: var(--ion-color-medium);
+      color: #666666 !important;
       padding: 8px 0;
     }
   }
@@ -187,11 +229,12 @@ ion-header {
       cursor: pointer;
       transition: all 0.2s ease;
       min-height: 50px;
+      background-color: #ffffff;
 
       .day-number {
         font-size: 0.9rem;
         font-weight: 500;
-        color: var(--ion-color-dark);
+        color: #000000 !important;
       }
 
       .task-indicators {
@@ -222,14 +265,14 @@ ion-header {
 
         .task-count {
           font-size: 0.6rem;
-          color: var(--ion-color-medium);
+          color: #666666 !important;
           margin-left: 2px;
         }
       }
 
       &.other-month {
         .day-number {
-          color: var(--ion-color-light);
+          color: #cccccc !important;
         }
       }
 
@@ -256,7 +299,7 @@ ion-header {
       }
 
       &.has-tasks {
-        background-color: var(--ion-color-light);
+        background-color: #f5f5f5;
       }
 
       &:hover {
@@ -272,6 +315,7 @@ ion-header {
   margin: 0 0 16px 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 16px;
+  background-color: #ffffff !important;
 
   .task-item {
     --padding-start: 16px;
@@ -279,7 +323,7 @@ ion-header {
     --inner-padding-end: 8px;
     margin-bottom: 8px;
     border-radius: 12px;
-    background-color: var(--ion-color-light);
+    background-color: #f5f5f5 !important;
 
     &:last-child {
       margin-bottom: 0;
@@ -290,24 +334,25 @@ ion-header {
         margin: 0 0 4px 0;
         font-size: 1rem;
         font-weight: 600;
-        color: var(--ion-color-dark);
+        color: #000000 !important;
 
         &.completed {
           text-decoration: line-through;
-          color: var(--ion-color-medium);
+          color: #666666 !important;
         }
       }
 
       p {
         margin: 2px 0;
         font-size: 0.8rem;
-        color: var(--ion-color-medium);
+        color: #666666 !important;
         display: flex;
         align-items: center;
         gap: 4px;
 
         ion-icon {
           font-size: 14px;
+          color: #666666 !important;
         }
       }
     }
@@ -324,6 +369,7 @@ ion-header {
       --padding-start: 8px;
       --padding-end: 8px;
       margin-left: 8px;
+      --color: #000000 !important;
     }
   }
 }
@@ -333,10 +379,12 @@ ion-header {
   margin: 0 0 16px 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 16px;
+  background-color: #ffffff !important;
 
   ion-card-content {
     text-align: center;
     padding: 32px 16px;
+    background-color: #ffffff !important;
 
     &.text-center {
       display: flex;
@@ -348,23 +396,25 @@ ion-header {
 
     ion-icon {
       opacity: 0.5;
+      color: #666666 !important;
     }
 
     h3 {
       margin: 0;
       font-size: 1.1rem;
-      color: var(--ion-color-medium);
+      color: #666666 !important;
     }
 
     p {
       margin: 0;
       font-size: 0.9rem;
-      color: var(--ion-color-medium);
+      color: #666666 !important;
     }
 
     ion-button {
       margin-top: 8px;
       --border-radius: 12px;
+      --color: #5aad85 !important;
     }
   }
 }
@@ -461,31 +511,5 @@ ion-fab {
   transition: all 0.2s ease;
 }
 
-// Estilos para modo oscuro
-@media (prefers-color-scheme: dark) {
-  .calendar-card,
-  .tasks-card,
-  .no-tasks-card,
-  .stat-card {
-    background-color: var(--ion-color-dark-tint);
-    border: 1px solid var(--ion-color-medium-tint);
-  }
-
-  .calendar-day {
-    &.has-tasks {
-      background-color: var(--ion-color-dark-shade);
-    }
-    
-    &:hover {
-      background-color: var(--ion-color-primary-shade);
-    }
-  }
-
-  .task-item {
-    background-color: var(--ion-color-dark-shade);
-    
-    &:hover {
-      background-color: var(--ion-color-primary-shade);
-    }
-  }
-}
+// Los estilos para modo oscuro han sido removidos completamente
+// para mantener siempre el modo claro

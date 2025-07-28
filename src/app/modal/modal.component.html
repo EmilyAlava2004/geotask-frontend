@@ -127,11 +127,7 @@
           </ion-button>
         </ion-item>
 
-        <ion-item *ngIf="selectedLocation?.address">
-          <ion-label>
-            <p>{{selectedLocation?.address}}</p>
-          </ion-label>
-        </ion-item>
+        
 
         <!-- Búsqueda de ubicaciones -->
         <div *ngIf="showLocationSearch" class="location-search">
@@ -148,12 +144,11 @@
               <ion-icon name="location-outline" slot="start"></ion-icon>
               <ion-label>
                 <h3>{{location.name}}</h3>
-                <p>{{location.address}}</p>
               </ion-label>
             </ion-item>
           </ion-list>
 
-          <ion-item *ngIf="locationResults.length === 0 && !isSearchingLocation" button (click)="selectLocation({name: 'Sin ubicación', address: '', latitude: 0, longitude: 0})">
+          <ion-item *ngIf="locationResults.length === 0 && !isSearchingLocation" button (click)="selectLocation({name: 'Sin ubicación', latitude: 0, longitude: 0})">
             <ion-icon name="close-circle-outline" slot="start"></ion-icon>
             <ion-label>
               <h3>Sin ubicación</h3>
@@ -176,7 +171,7 @@
         <ion-item>
           <ion-datetime 
             name="dueDate"
-            [(ngModel)]="taskForm.dueDate"
+            [(ngModel)]="taskForm.date"
             (ionChange)="onFormChange()"
             [min]="minDate"
             placeholder="Selecciona una fecha">

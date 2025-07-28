@@ -129,7 +129,7 @@
                 <p>{{task.description}}</p>
                 <p *ngIf="task.Location">
                   <ion-icon name="location" color="medium"></ion-icon>
-                  {{task.Location.name || task.Location.address}}
+                  {{task.Location.name}}
                 </p>
                 <p *ngIf="task.category">
                   <ion-icon name="pricetag-outline" color="medium"></ion-icon>

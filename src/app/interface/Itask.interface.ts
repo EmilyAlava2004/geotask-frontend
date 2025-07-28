@@ -22,7 +22,6 @@ export interface Task {
   Location?: {
     id: number;
     name: string;
-    address?: string;
     latitude: number;
     longitude: number;
     geofence_radius?: number;
@@ -33,7 +32,6 @@ export interface Task {
 export interface Location {
   id?: number;
   name: string;
-  address?: string;
   latitude: number;
   longitude: number;
   geofence_radius?: number;

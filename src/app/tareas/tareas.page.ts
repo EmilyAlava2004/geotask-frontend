@@ -71,11 +71,10 @@ interface TaskDisplay {
   category: string;
   location: {
     name: string;
-    address: string;
     latitude: number;
     longitude: number;
   };
-  dueDate: Date;
+  date: Date;
   createdAt: Date;
   distance?: number;
 }
@@ -148,6 +147,11 @@ export class TareasPage implements OnInit {
 
   ngOnInit() {
     this.loadTasks();
+    
+  this.taskService.tasksChanged$.subscribe(() => {
+    this.loadTasks();
+  });
+  
   }
 goToSettings() {
   this.router.navigate(['/settings']);
@@ -182,11 +186,10 @@ goToSettings() {
 
       location: {
         name: task.Location?.name || 'Ubicación no asignada',
-        address: task.Location?.address || '',
         latitude: task.Location?.latitude || 0,
         longitude: task.Location?.longitude || 0
       },
-      dueDate: new Date(task.date || Date.now()),
+      date: new Date(task.date || Date.now()),
       createdAt: new Date(task.createdAt || Date.now()),
       distance: this.calculateDistance(task.Location?.latitude, task.Location?.longitude)
     }));
@@ -328,17 +331,18 @@ goToSettings() {
 
   toggleTaskStatus(task: TaskDisplay) {
     // Determinar nuevo estado
-    let newStatus: string;
-    if (task.status === 'completed') {
-      newStatus = 'pendiente';
-      task.status = 'pending';
-    } else if (task.status === 'pending') {
-      newStatus = 'en-progreso';
-      task.status = 'in-progress';
-    } else {
-      newStatus = 'finalizado';
-      task.status = 'completed';
-    }
+    let newStatus: 'pending' | 'in-progress' | 'completed';
+
+if (task.status === 'completed') {
+  newStatus = 'pending';
+} else if (task.status === 'pending') {
+  newStatus = 'in-progress';
+} else {
+  newStatus = 'completed';
+}
+
+task.status = newStatus;
+
 
     // Actualizar en la API
     const taskUpdate = {
@@ -421,29 +425,21 @@ goToSettings() {
 
     await alert.present();
   }
+async createNewTask() {
+  const modal = await this.modalController.create({
+    component: ModalComponent
+  });
 
-  async createNewTask() {
-    const modal = await this.modalController.create({
-      component: ModalComponent
-    });
+  await modal.present();
 
-    await modal.present();
+  const { data, role } = await modal.onWillDismiss();
 
-    const { data } = await modal.onWillDismiss();
-    if (data) {
-      // Crear nueva tarea en la API
-      this.taskService.createTask(data).subscribe({
-        next: (newTask) => {
-          this.showSuccessToast('Tarea creada correctamente');
-          this.loadTasks(); // Recargar todas las tareas
-        },
-        error: (error) => {
-          console.error('Error creating task:', error);
-          this.showErrorToast('Error al crear la tarea');
-        }
-      });
-    }
+  if (data?.action === 'created') {
+    this.showSuccessToast('Tarea creada correctamente');
+    this.loadTasks(); // recarga la lista
   }
+}
+
 
   formatDate(date: string | Date | undefined | null): string {
     if (!date) return 'Fecha no disponible';

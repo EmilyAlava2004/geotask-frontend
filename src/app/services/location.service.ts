@@ -5,7 +5,6 @@ import { Observable } from 'rxjs';
 export interface Location {
   id?: number;
   name?: string;
-  address?: string;
   latitude: number;
   longitude: number;
   geofence_radius?: number;

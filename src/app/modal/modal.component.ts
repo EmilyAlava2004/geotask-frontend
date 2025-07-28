@@ -6,7 +6,7 @@ import {
   IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonDatetime,
   IonButtons, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
   IonCardTitle, IonCardContent, IonChip, IonToast, IonSearchbar, IonList,
-  ModalController, IonSpinner,
+  ModalController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -30,7 +30,7 @@ import { AuthService } from '../services/auth.service';
     IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonDatetime, 
     IonButtons, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
     IonCardTitle, IonCardContent, IonChip, IonToast, IonSearchbar, IonList, 
-    IonSpinner
+    
   ]
 })
 export class ModalComponent implements OnInit {
@@ -49,14 +49,14 @@ export class ModalComponent implements OnInit {
     description: string;
     priority: 'low' | 'medium' | 'high';
     category: 'Work' | 'Personal' | 'Study' | 'Urgent' | 'Health' | 'other';
-    dueDate: string;
+    date: string;
     location_id: number | undefined;
   } = {
     title: '',
     description: '',
     priority: 'medium',
     category: 'Work',
-    dueDate: new Date().toISOString(),
+    date: new Date().toISOString(),
     location_id: undefined
   };
 
@@ -133,7 +133,8 @@ export class ModalComponent implements OnInit {
 
   ngOnInit() {
     if (this.selectedDate) {
-      this.taskForm.dueDate = this.selectedDate + 'T12:00:00.000Z';
+      this.taskForm.date = this.selectedDate + 'T12:00:00.000Z';
+      
     }
     
     if (this.isEditing && this.task) {
@@ -153,7 +154,7 @@ export class ModalComponent implements OnInit {
         description: this.task.description,
         priority: this.task.priority,
         category: this.task.category,
-        dueDate: this.task.date + 'T12:00:00.000Z',
+        date: this.task.date + 'T12:00:00.000Z',
         location_id: this.task.location_id || undefined
       };
       
@@ -192,8 +193,7 @@ export class ModalComponent implements OnInit {
       this.isSearchingLocation = true;
       setTimeout(() => {
         this.locationResults = this.availableLocations.filter(location =>
-          (location.name?.toLowerCase().includes(query) ?? false) ||
-          (location.address?.toLowerCase().includes(query) ?? false)
+          (location.name?.toLowerCase().includes(query) ?? false)
         );
         this.isSearchingLocation = false;
       }, 500);
@@ -270,7 +270,7 @@ async createTask() {
     const taskPayload: Task = {
       title: this.taskForm.title.trim(),
       description: this.taskForm.description.trim(),
-      date: this.taskForm.dueDate.split('T')[0],
+      date: this.taskForm.date.split('T')[0],
       status: this.isEditing && this.task ? this.task.status : 'pending',
       priority: this.taskForm.priority,
       category: this.taskForm.category,
@@ -282,6 +282,7 @@ async createTask() {
       const updatedTask = await this.taskService.updateTask(this.task.id, taskPayload).toPromise();
       this.showToastMessage('Tarea actualizada correctamente', 'success');
       await this.modalController.dismiss({ action: 'updated', task: updatedTask });
+
     } else {
       const createdTask = await this.taskService.createTask(taskPayload).toPromise();
       this.showToastMessage('Tarea creada correctamente', 'success');

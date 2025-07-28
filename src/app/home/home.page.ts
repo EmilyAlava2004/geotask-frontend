@@ -1,14 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { 
-  IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonApp, 
-  IonList, IonIcon, IonItem, IonLabel, IonButton, IonCard, 
+  IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonIcon, IonItem, IonLabel, IonButton, IonCard, 
   IonCardContent, IonCardHeader, IonCardTitle, IonCheckbox, 
-  IonChip, IonAvatar, IonFab, IonFabButton, IonRouterOutlet,
+  IonChip, IonFab, IonFabButton, IonRouterOutlet,
   ModalController, IonSpinner, IonToast } from '@ionic/angular/standalone';
-import {
-  IonMenu,
-  IonMenuButton,
-} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { 
   homeSharp, trendingUpOutline, mapSharp, settingsSharp,
@@ -42,7 +37,7 @@ interface CalendarDay {
     IonFabButton, IonFab,  IonChip, IonCheckbox, IonCardTitle, 
     IonCardHeader, IonCardContent, IonCard, IonButton, IonLabel, IonItem, 
     IonIcon,  IonButtons, IonHeader, IonToolbar, IonTitle, 
-    IonContent, IonMenuButton, CommonModule
+    IonContent, CommonModule
   ],
 })
 export class HomePage implements OnInit {
@@ -99,7 +94,9 @@ ngOnInit() {
   this.currentDate = new Date(today.getFullYear(), today.getMonth(), 1);
   
   this.updateCurrentMonthYear();
-  this.loadTasksFromAPI();
+  this.taskService.tasksChanged$.subscribe(() => {
+    this.loadTasksFromAPI();
+  });
 }
 goToSettings() {
   this.router.navigate(['/settings']);
