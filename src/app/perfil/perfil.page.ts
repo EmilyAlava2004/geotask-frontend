@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons } from '@ionic/angular/standalone';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-
+import { TaskService } from '../services/task.service';
 import { UserService } from '../services/user.service';
 
 import {
@@ -141,7 +141,7 @@ export class PerfilPage implements OnInit {
     private toastController: ToastController,
     private actionSheetController: ActionSheetController,
     private modalController: ModalController,
-
+    private taskService: TaskService,
     private loadingController: LoadingController,
     private userService: UserService
   ) {
@@ -184,7 +184,11 @@ export class PerfilPage implements OnInit {
   ngOnInit() {
     this.loadTaskStats();
     this.viewProfile();
-  }viewProfile() {
+    this.taskService.tasksChanged$.subscribe(() => {
+      this.loadTaskStats();
+  });
+  }
+  viewProfile() {
   if (!this.personid) {
     console.error('No hay ID de usuario en localStorage');
     return;
@@ -246,21 +250,20 @@ export class PerfilPage implements OnInit {
   /**
    * Cargar estadísticas de tareas
    */
-  private async loadTaskStats() {
-    try {
-      // Aquí normalmente harías una llamada al servicio de tareas
-      // Por ahora usamos datos mockeados
-      await this.delay(1000); // Simular carga
+  private loadTaskStats() {
+  this.taskService.getTasks().subscribe({
+    next: (tasks) => {
+      const total = tasks.length;
+      const completed = tasks.filter(t => t.status === 'completed').length;
+      const pending = total - completed;
 
-      this.taskStats = {
-        total: 25,
-        completed: 18,
-        pending: 7
-      };
-    } catch (error) {
-      console.error('Error loading task stats:', error);
+      this.taskStats = { total, completed, pending };
+    },
+    error: (error) => {
+      console.error('Error al obtener estadísticas de tareas:', error.message);
     }
-  }
+  });
+}
 
   /**
    * Alternar modo de edición

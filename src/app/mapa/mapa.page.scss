@@ -15,7 +15,7 @@ ion-card {
 }
 
 ion-card-header {
-  background-color: #000000;
+  background-color: #ffffff;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
 }
@@ -34,8 +34,9 @@ ion-button {
 ion-select {
   border-radius: 10px;
   padding: 6px 10px;
-  background: #070707;
+  background: #ccc;
   border: 1px solid #ccc;
+   margin-top: 8px;
 }
 
 @media (max-width: 600px) {
