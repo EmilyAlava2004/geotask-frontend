@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonApp, IonButtons } from '@ionic/angular/standalone';
 import {IonMenu, IonMenuButton} from '@ionic/angular/standalone';
-import { 
+import {
   IonSearchbar,
   IonSegment,
   IonSegmentButton,
@@ -37,17 +37,17 @@ import {
 import {
   settingsOutline // <-- Agregar este ícono
 } from 'ionicons/icons';
-import { 
-  addIcons 
+import {
+  addIcons
 } from 'ionicons';
 import { Router } from '@angular/router';
 
-import { 
-  add, 
-  locationOutline, 
-  timeOutline, 
-  checkmarkCircle, 
-  alertCircle, 
+import {
+  add,
+  locationOutline,
+  timeOutline,
+  checkmarkCircle,
+  alertCircle,
   ellipsisVertical,
   filterOutline,
   searchOutline,
@@ -84,7 +84,7 @@ interface TaskDisplay {
   templateUrl: './tareas.page.html',
   styleUrls: ['./tareas.page.scss'],
   standalone: true,
-  imports: [IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, 
+  imports: [IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule,
     IonSearchbar,
     IonSegment,
     IonSegmentButton,
@@ -108,7 +108,7 @@ interface TaskDisplay {
     IonCheckbox,
     IonSelect,
     IonSelectOption,
-    IonProgressBar, 
+    IonProgressBar,
   ]
 })
 export class TareasPage implements OnInit {
@@ -147,18 +147,18 @@ export class TareasPage implements OnInit {
 
   ngOnInit() {
     this.loadTasks();
-    
+
   this.taskService.tasksChanged$.subscribe(() => {
     this.loadTasks();
   });
-  
+
   }
 goToSettings() {
   this.router.navigate(['/settings']);
 }
   loadTasks() {
     this.isLoading = true;
-    
+
     this.taskService.getTasks().subscribe({
       next: (tasks) => {
         this.tasks = this.mapApiTasksToDisplay(tasks);
@@ -185,13 +185,13 @@ goToSettings() {
       category: task.category|| 'Sin categoría',
 
       location: {
-        name: task.Location?.name || 'Ubicación no asignada',
-        latitude: task.Location?.latitude || 0,
-        longitude: task.Location?.longitude || 0
+        name: task.location?.name || 'Ubicación no asignada',
+        latitude: task.location?.latitude || 0,
+        longitude: task.location?.longitude || 0
       },
       date: new Date(task.date || Date.now()),
       createdAt: new Date(task.createdAt || Date.now()),
-      distance: this.calculateDistance(task.Location?.latitude, task.Location?.longitude)
+      distance: this.calculateDistance(task.location?.latitude, task.location?.longitude)
     }));
   }
 
@@ -252,10 +252,10 @@ goToSettings() {
 
   filterTasks() {
     this.filteredTasks = this.tasks.filter(task => {
-      const matchesSearch = 
+      const matchesSearch =
         (task.title?.toLowerCase() ?? '').includes(this.searchTerm?.toLowerCase() ?? '') ||
         (task.description?.toLowerCase() ?? '').includes(this.searchTerm?.toLowerCase() ?? '');
-      
+
       const matchesStatus = this.selectedSegment === 'all' || task.status === this.selectedSegment;
       const matchesPriority = this.selectedPriority === 'all' || task.priority === this.selectedPriority;
       const matchesCategory = this.selectedCategory === 'all' || task.category === this.selectedCategory;

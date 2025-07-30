@@ -113,8 +113,8 @@ export class MapaPage implements OnInit {
           console.log('📝 Título:', task.title);
           console.log('🆔 ID:', task.id);
           console.log('📂 Categoría:', task.category);
-          console.log('📍 Location completo:', task.Location);
-          console.log('🔑 Propiedades de Location:', task.Location ? Object.keys(task.Location) : 'N/A');
+          console.log('📍 Location completo:', task.location);
+          console.log('🔑 Propiedades de Location:', task.location ? Object.keys(task.location) : 'N/A');
 
           // Verificar diferentes nombres posibles para la ubicación
           console.log('🔍 Verificando propiedades alternativas:');
@@ -128,7 +128,7 @@ export class MapaPage implements OnInit {
         // Filtrar solo tareas que tengan ubicación (probando diferentes propiedades)
         this.tasks = res.filter(t => {
           // Probar diferentes estructuras posibles
-          const locationObj = t.Location || (t as any).location || (t as any).position;
+          const locationObj = t.location || (t as any).location || (t as any).position;
 
           const tieneUbicacion = locationObj &&
                                 locationObj.latitude !== null &&
@@ -141,7 +141,7 @@ export class MapaPage implements OnInit {
           if (!tieneUbicacion) {
             console.log('⚠️ Tarea SIN ubicación válida:', {
               title: t.title,
-              Location: t.Location,
+              Location: t.location,
               locationAlt: (t as any).location,
               hasLatLng: !!(locationObj?.latitude && locationObj?.longitude)
             });
@@ -186,7 +186,7 @@ export class MapaPage implements OnInit {
 
     this.tasks.forEach((task, index) => {
       // ✅ Obtener ubicación de diferentes propiedades posibles
-      const locationObj = task.Location || (task as any).location || (task as any).position;
+      const locationObj = task.location || (task as any).location || (task as any).position;
 
       if (!task?.id || !locationObj) {
         console.log('⚠️ Saltando tarea sin ID o ubicación:', task);
@@ -293,7 +293,7 @@ export class MapaPage implements OnInit {
 
     // Agregar marcadores filtrados
     tareasFiltradas.forEach(task => {
-      if (!task.Location) return;
+      if (!task.location) return;
 
       const el = document.createElement('div');
       el.className = 'marker task-marker';
@@ -306,7 +306,7 @@ export class MapaPage implements OnInit {
       );
 
       new mapboxgl.Marker(el)
-        .setLngLat([task.Location.longitude, task.Location.latitude])
+        .setLngLat([task.location.longitude, task.location.latitude])
         .setPopup(popup)
         .addTo(this.map);
     });
@@ -389,7 +389,7 @@ export class MapaPage implements OnInit {
     console.log('🔍 Verificando tareas cercanas desde:', { userLat, userLng });
 
     this.tasks.forEach(task => {
-      const locationObj = task.Location || (task as any).location || (task as any).position;
+      const locationObj = task.location || (task as any).location || (task as any).position;
       if (!locationObj) return;
 
       const { latitude, longitude, geofence_radius } = locationObj;
@@ -418,7 +418,7 @@ export class MapaPage implements OnInit {
 
     // Agregar cada tarea a los límites
     this.tasks.forEach(task => {
-      const locationObj = task.Location || (task as any).location || (task as any).position;
+      const locationObj = task.location || (task as any).location || (task as any).position;
       if (locationObj) {
         const lng = Number(locationObj.longitude);
         const lat = Number(locationObj.latitude);

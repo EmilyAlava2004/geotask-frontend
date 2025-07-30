@@ -30,9 +30,9 @@ notifyTasksChanged() {
 
       // Asegurar que lat/lng sean tipo number
       tasks.forEach(task => {
-        if (task.Location) {
-          task.Location.latitude = parseFloat(task.Location.latitude as any);
-          task.Location.longitude = parseFloat(task.Location.longitude as any);
+        if (task.location) {
+          task.location.latitude = parseFloat(task.location.latitude as any);
+          task.location.longitude = parseFloat(task.location.longitude as any);
         }
       });
     }),

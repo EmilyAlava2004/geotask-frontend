@@ -12,14 +12,14 @@ export interface Task {
   location_id?: number | null; // Cambiado de undefined a null
   createdAt?: string;
   updatedAt?: string;
-  
+
   // Relaciones incluidas por el backend
   User?: {
     id: number;
     name: string;
     email: string;
   };
-  Location?: {
+  location?: {
     id: number;
     name: string;
     latitude: number;

@@ -162,8 +162,8 @@ ngOnInit() {
         location_id: this.task.location_id || undefined
       };
 
-      if (this.task.Location) {
-        this.selectedLocation = this.task.Location;
+      if (this.task.location) {
+        this.selectedLocation = this.task.location;
       }
     }
   }

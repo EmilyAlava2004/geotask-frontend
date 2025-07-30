@@ -7,7 +7,7 @@
         <ion-icon name="settings-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
-    
+
     <ion-title class="custom-title">
       <div class="title-container">
         <img src="assets/icon/Logo.png" alt="Logo" class="app-logo">
@@ -15,9 +15,9 @@
     </ion-title>
   </ion-toolbar>
 </ion-header>
-    
+
     <ion-content class="ion-padding">
-      
+
       <!-- Loading spinner -->
       <div *ngIf="isLoading" class="loading-container">
         <ion-spinner name="crescent"></ion-spinner>
@@ -38,7 +38,7 @@
               </div>
             </ion-card-content>
           </ion-card>
-          
+
           <ion-card class="stat-card">
             <ion-card-content>
               <div class="stat-content">
@@ -50,7 +50,7 @@
               </div>
             </ion-card-content>
           </ion-card>
-          
+
           <ion-card class="stat-card">
             <ion-card-content>
               <div class="stat-content">
@@ -84,20 +84,20 @@
             <div class="calendar-weekdays">
               <div class="weekday" *ngFor="let day of weekDays">{{day}}</div>
             </div>
-            
+
             <!-- Días del mes -->
             <div class="calendar-days">
-              <div 
-                class="calendar-day" 
-                *ngFor="let day of calendarDays" 
+              <div
+                class="calendar-day"
+                *ngFor="let day of calendarDays"
                 [class.other-month]="!day.isCurrentMonth"
                 [class.today]="day.isToday"
                 [class.selected]="day.isSelected"
                 [class.has-tasks]="day.taskCount > 0"
                 (click)="selectDay(day)">
-                
+
                 <span class="day-number">{{day.date}}</span>
-                
+
                 <!-- Indicador de tareas -->
                 <div class="task-indicators" *ngIf="day.taskCount > 0">
                   <div class="task-dot" *ngFor="let task of day.tasks.slice(0, 3)"
@@ -118,36 +118,36 @@
           </ion-card-header>
           <ion-card-content>
             <ion-item *ngFor="let task of selectedDayTasks" class="task-item">
-              <ion-checkbox 
-                slot="start" 
+              <ion-checkbox
+                slot="start"
                 [checked]="task.status === 'completed'"
                 (ionChange)="toggleTaskComplete(task)">
               </ion-checkbox>
-              
+
               <ion-label (click)="editTask(task, $event)">
                 <h3 [class.completed]="task.status === 'completed'">{{task.title}}</h3>
                 <p>{{task.description}}</p>
-                <p *ngIf="task.Location">
+                <p *ngIf="task.location">
                   <ion-icon name="location" color="medium"></ion-icon>
-                  {{task.Location.name}}
+                  {{task.location.name}}
                 </p>
                 <p *ngIf="task.category">
                   <ion-icon name="pricetag-outline" color="medium"></ion-icon>
                   {{task.category}}
                 </p>
               </ion-label>
-              
-              <ion-chip 
-                slot="end" 
+
+              <ion-chip
+                slot="end"
                 [color]="getPriorityColor(task.priority)">
                 {{task.priority === 'high' ? 'Alta' : task.priority === 'medium' ? 'Media' : 'Baja'}}
               </ion-chip>
-              
-              <ion-button 
-                slot="end" 
-                fill="clear" 
+
+              <ion-button
+                slot="end"
+                fill="clear"
                 (click)="viewTaskLocation(task)"
-                *ngIf="task.Location">
+                *ngIf="task.location">
                 <ion-icon name="navigate"></ion-icon>
               </ion-button>
             </ion-item>
