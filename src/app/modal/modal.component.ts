@@ -27,10 +27,10 @@ import { AuthService } from '../services/auth.service';
   imports: [
     CommonModule, FormsModule,
     IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonItem,
-    IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonDatetime, 
+    IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonDatetime,
     IonButtons, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
-    IonCardTitle, IonCardContent, IonChip, IonToast, IonSearchbar, IonList, 
-    
+    IonCardTitle, IonCardContent, IonChip, IonToast, IonSearchbar, IonList,
+
   ]
 })
 export class ModalComponent implements OnInit {
@@ -62,44 +62,44 @@ export class ModalComponent implements OnInit {
 
   // Categorías predefinidas según tu modelo de backend
   categories = [
-    { 
-      value: 'Work', 
-      label: 'Trabajo', 
-      icon: 'briefcase-outline', 
-      color: 'primary' 
+    {
+      value: 'Work',
+      label: 'Trabajo',
+      icon: 'briefcase-outline',
+      color: 'primary'
     },
-    { 
-      value: 'Personal', 
-      label: 'Personal', 
-      icon: 'person-outline', 
-      color: 'secondary' 
+    {
+      value: 'Personal',
+      label: 'Personal',
+      icon: 'person-outline',
+      color: 'secondary'
     },
-    { 
-      value: 'Study', 
-      label: 'Estudio', 
-      icon: 'library-outline', 
-      color: 'tertiary' 
+    {
+      value: 'Study',
+      label: 'Estudio',
+      icon: 'library-outline',
+      color: 'tertiary'
     },
-    { 
-      value: 'Urgent', 
-      label: 'Urgente', 
-      icon: 'alert-outline', 
-      color: 'danger' 
+    {
+      value: 'Urgent',
+      label: 'Urgente',
+      icon: 'alert-outline',
+      color: 'danger'
     },
-    { 
-      value: 'Health', 
-      label: 'Salud', 
-      icon: 'medical-outline', 
-      color: 'success' 
+    {
+      value: 'Health',
+      label: 'Salud',
+      icon: 'medical-outline',
+      color: 'success'
     },
-    { 
-      value: 'other', 
-      label: 'Otro', 
-      icon: 'ellipsis-horizontal-outline', 
-      color: 'medium' 
+    {
+      value: 'other',
+      label: 'Otro',
+      icon: 'ellipsis-horizontal-outline',
+      color: 'medium'
     }
   ];
-  
+
   priorities = [
     { value: 'low', label: 'Baja', color: 'success' },
     { value: 'medium', label: 'Media', color: 'warning' },
@@ -130,23 +130,27 @@ export class ModalComponent implements OnInit {
       libraryOutline, alertOutline, medicalOutline, ellipsisHorizontalOutline
     });
   }
-
-  ngOnInit() {
-    if (this.selectedDate) {
-      this.taskForm.date = this.selectedDate + 'T12:00:00.000Z';
-      
-    }
-    
-    if (this.isEditing && this.task) {
-      this.modalTitle = 'Editar Tarea';
-      this.buttonText = 'Guardar Cambios';
-      this.buttonIcon = 'save-outline';
-      this.loadTaskData();
-    }
-    this.validateForm();
-    this.fetchLocations();
+ngOnInit() {
+  if (this.selectedDate) {
+    this.taskForm.date = this.selectedDate + 'T12:00:00.000Z';
   }
 
+  const idGuardado = localStorage.getItem('ubicacionParaTarea');
+  if (idGuardado) {
+    this.taskForm.location_id = Number(idGuardado);
+    localStorage.removeItem('ubicacionParaTarea'); // Limpiar para no usarlo de nuevo
+  }
+
+  if (this.isEditing && this.task) {
+    this.modalTitle = 'Editar Tarea';
+    this.buttonText = 'Guardar Cambios';
+    this.buttonIcon = 'save-outline';
+    this.loadTaskData();
+  }
+
+  this.validateForm();
+  this.fetchLocations();
+}
   private loadTaskData() {
     if (this.task) {
       this.taskForm = {
@@ -157,7 +161,7 @@ export class ModalComponent implements OnInit {
         date: this.task.date + 'T12:00:00.000Z',
         location_id: this.task.location_id || undefined
       };
-      
+
       if (this.task.Location) {
         this.selectedLocation = this.task.Location;
       }
@@ -288,7 +292,7 @@ async createTask() {
       this.showToastMessage('Tarea creada correctamente', 'success');
       await this.modalController.dismiss({ action: 'created', task: createdTask });
     }
-    
+
   } catch (error) {
     console.error('Error al guardar la tarea:', error);
     this.showToastMessage('Error al guardar la tarea. Intenta nuevamente.', 'danger');

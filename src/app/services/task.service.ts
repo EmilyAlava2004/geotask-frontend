@@ -16,7 +16,7 @@ export class TaskService {
  private tasksChanged = new BehaviorSubject<void>(undefined);
   tasksChanged$ = this.tasksChanged.asObservable();
   constructor(private http: HttpClient) {}
-  
+
 notifyTasksChanged() {
     this.tasksChanged.next();
   }
@@ -44,16 +44,16 @@ getTasksByUserId(userId: number) {
   // Crear una nueva tarea
   createTask(task: Task): Observable<Task> {
     console.log('📤 Enviando tarea al backend:', task);
-    
+
     // Validar datos antes de enviar
     if (!task.title || !task.description || !task.category || !task.user_id) {
       console.error('❌ Datos de tarea incompletos:', task);
-      return throwError(() => ({ 
-        message: 'Datos de tarea incompletos', 
-        originalError: null 
+      return throwError(() => ({
+        message: 'Datos de tarea incompletos',
+        originalError: null
       }));
     }
-    
+
     return this.http.post<Task>(this.apiUrl, task, {
       headers: this.getHeaders()
     }).pipe(
@@ -68,7 +68,7 @@ getTasksByUserId(userId: number) {
   // Actualizar una tarea existente
   updateTask(id: number, task: Task): Observable<Task> {
     console.log('📤 Actualizando tarea:', id, task);
-    
+
     return this.http.put<Task>(`${this.apiUrl}/${id}`, task, {
       headers: this.getHeaders()
     }).pipe(
@@ -143,7 +143,7 @@ getTasksByUserId(userId: number) {
       } else if (error.status === 400) {
         // Manejar errores de validación específicos
         if (error.error?.errors) {
-          const validationErrors = error.error.errors.map((err: any) => 
+          const validationErrors = error.error.errors.map((err: any) =>
             `${err.field}: ${err.message}`
           ).join(', ');
           errorMessage = `Error de validación: ${validationErrors}`;
@@ -161,10 +161,10 @@ getTasksByUserId(userId: number) {
       }
     }
 
-    return throwError(() => ({ 
-      message: errorMessage, 
+    return throwError(() => ({
+      message: errorMessage,
       originalError: error,
-      status: error.status 
+      status: error.status
     }));
   }
 }

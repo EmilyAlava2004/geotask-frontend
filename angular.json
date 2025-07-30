@@ -18,10 +18,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": {
-              "base": "www",
-              "browser": ""
-            },
+           "outputPath": "www",
             "index": "src/index.html",
             "polyfills": [
               "src/polyfills.ts"
@@ -129,14 +126,11 @@
     }
   },
   "cli": {
-<<<<<<< HEAD
-    "schematicCollections": ["@ionic/angular-toolkit"]
-=======
+
     "schematicCollections": [
       "@ionic/angular-toolkit"
     ],
     "analytics": false
->>>>>>> origin/develop
   },
   "schematics": {
     "@ionic/angular-toolkit:component": {

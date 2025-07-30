@@ -4,47 +4,41 @@
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-ion-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  padding: 8px;
+/* Estilo base para marcadores */
+.marker {
+  width: 32px;
+  height: 32px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
 }
 
-ion-card-header {
-  background-color: #ffffff;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
+/* Marcador de ubicación actual */
+.current-location-marker {
+  border: 2px solid #007bff;
+  border-radius: 50%;
 }
 
-ion-label {
-  font-size: 1rem;
-  font-weight: 500;
+/* Marcador de tareas */
+.task-marker {
+  border: 2px solid #28a745;
+  border-radius: 50%;
 }
 
-ion-button {
-  margin-top: 12px;
-  border-radius: 10px;
-  font-weight: 600;
+/* Botones en popups */
+.mapboxgl-popup-content button {
+  margin-top: 8px;
+  padding: 5px 10px;
+  background-color: #3880ff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-ion-select {
-  border-radius: 10px;
-  padding: 6px 10px;
-  background: #ccc;
-  border: 1px solid #ccc;
-   margin-top: 8px;
-}
-
-@media (max-width: 600px) {
-  #map {
-    height: 50vh;
-  }
-
-  ion-card {
-    margin: 10px 0;
-  }
+.mapboxgl-popup-content button:hover {
+  background-color: #4c8dff;
 }
