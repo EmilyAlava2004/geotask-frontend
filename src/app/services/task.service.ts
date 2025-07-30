@@ -21,14 +21,25 @@ notifyTasksChanged() {
     this.tasksChanged.next();
   }
   // Obtener todas las tareas del usuario autenticado
-  getTasks(): Observable<Task[]> {
-    return this.http.get<Task[]>(this.apiUrl, {
-      headers: this.getHeaders()
-    }).pipe(
-      tap(tasks => console.log('Tareas obtenidas:', tasks)),
-      catchError(this.handleError)
-    );
-  }
+ getTasks(): Observable<Task[]> {
+  return this.http.get<Task[]>(this.apiUrl, {
+    headers: this.getHeaders()
+  }).pipe(
+    tap(tasks => {
+      console.log('Tareas obtenidas:', tasks);
+
+      // Asegurar que lat/lng sean tipo number
+      tasks.forEach(task => {
+        if (task.Location) {
+          task.Location.latitude = parseFloat(task.Location.latitude as any);
+          task.Location.longitude = parseFloat(task.Location.longitude as any);
+        }
+      });
+    }),
+    catchError(this.handleError)
+  );
+}
+
 getTasksByUserId(userId: number) {
   return this.http.get<Task[]>(`${this.apiUrl}/user/${userId}`);
 }

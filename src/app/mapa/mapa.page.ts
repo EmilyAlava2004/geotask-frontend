@@ -32,20 +32,40 @@ export class MapaPage implements OnInit {
   locations: Location[] = [];
   selectedLocationToDelete: number | null = null;
   tasks: Task[] = [];
-filtroCategoria: string = 'all';
-ngOnInit() {
-    this.locationService.getAllLocations().subscribe({
-    next: res => {
-      this.locations = res;
-      console.log('Ubicaciones cargadas:', this.locations);
-    },
-    error: err => {
-      console.error('Error al cargar ubicaciones', err);
-      alert('No se pudieron cargar las ubicaciones guardadas');
-    }
-  });
-    this.cargarUbicaciones();
+  filtroCategoria: string = 'all';
+  map!: mapboxgl.Map;
+  directionsClient: any;
 
+  constructor(
+    private locationService: LocationService,
+    private taskService: TaskService
+  ) {
+    this.directionsClient = mbxDirections({
+      accessToken: 'pk.eyJ1IjoidGhvbWFza2x6IiwiYSI6ImNsM3VibWJwbTI4emkzZXBlamVjOHp0Z2YifQ.QhFxYxdIC2m4vGlEkMqrow'
+    });
+  }
+
+  ngOnInit() {
+    this.cargarUbicaciones();
+  }
+
+  async ngAfterViewInit() {
+    console.log('ngAfterViewInit ejecutado');
+    await this.getCurrentPosition();
+
+    // ✅ Asegurar que el mapa esté completamente cargado antes de agregar marcadores
+    this.map.on('load', () => {
+      console.log('Mapa completamente cargado, cargando tareas...');
+      this.cargarTareasConUbicacion();
+    });
+  }
+
+  async getCurrentPosition() {
+    const coordinates = await Geolocation.getCurrentPosition();
+    const { latitude, longitude } = coordinates.coords;
+    this.currentCoords = { lat: latitude, lng: longitude };
+    this.cargarMapa(longitude, latitude);
+    console.log('Posición actual:', latitude, longitude);
   }
 
   cargarMapa(longitud: number, latitud: number) {
@@ -57,7 +77,11 @@ ngOnInit() {
       zoom: 13,
     });
 
-    this.map.on('load', () => this.map.resize());
+    // ✅ Importante: esperar a que el mapa se redimensione
+    this.map.on('load', () => {
+      this.map.resize();
+      console.log('Mapa redimensionado y listo');
+    });
 
     this.map.addControl(new mapboxgl.NavigationControl());
     this.map.addControl(new mapboxgl.FullscreenControl());
@@ -66,6 +90,7 @@ ngOnInit() {
       trackUserLocation: true
     }));
 
+    // Marcador de ubicación actual
     const el = document.createElement('div');
     el.className = 'marker current-location-marker';
     el.style.backgroundImage = 'url(./assets/icon/placeholder.png)';
@@ -75,257 +100,393 @@ ngOnInit() {
     new mapboxgl.Marker(el).setLngLat([longitud, latitud]).addTo(this.map);
   }
 
+  cargarTareasConUbicacion() {
+    console.log('🔄 Iniciando carga de tareas...');
 
-filtrarTareas() {
-  const tareasFiltradas = this.tasks.filter(t =>
-    this.filtroCategoria === 'all' || t.category === this.filtroCategoria
-  );
+    this.taskService.getTasks().subscribe({
+      next: (res) => {
+        console.log('✅ Tareas recibidas del servidor:', res);
 
-   const existingTaskMarkers = document.querySelectorAll('.task-marker');
-  existingTaskMarkers.forEach(marker => marker.remove());
+        // ✅ DEBUGGING DETALLADO - Ver estructura completa de cada tarea
+        res.forEach((task, index) => {
+          console.log(`=== TAREA ${index + 1} ===`);
+          console.log('📝 Título:', task.title);
+          console.log('🆔 ID:', task.id);
+          console.log('📂 Categoría:', task.category);
+          console.log('📍 Location completo:', task.Location);
+          console.log('🔑 Propiedades de Location:', task.Location ? Object.keys(task.Location) : 'N/A');
 
-  // Agregar nuevos marcadores
-  tareasFiltradas.forEach(task => {
-    if (!task.Location) return;
-    const el = document.createElement('div');
-    el.className = 'marker task-marker';
+          // Verificar diferentes nombres posibles para la ubicación
+          console.log('🔍 Verificando propiedades alternativas:');
+          console.log('   - location:', (task as any).location);
+          console.log('   - position:', (task as any).position);
+          console.log('   - coordinates:', (task as any).coordinates);
+          console.log('   - lat/lng directo:', (task as any).latitude, (task as any).longitude);
+          console.log('========================');
+        });
 
-el.style.backgroundImage = 'url(./assets/icon/task-marker.png)';
-    el.style.width = '32px';
-    el.style.height = '32px';
+        // Filtrar solo tareas que tengan ubicación (probando diferentes propiedades)
+        this.tasks = res.filter(t => {
+          // Probar diferentes estructuras posibles
+          const locationObj = t.Location || (t as any).location || (t as any).position;
 
-    const popup = new mapboxgl.Popup({ offset: 25 }).setText(
-      `${task.title} (${task.category}) - ${task.status}`
-    );
+          const tieneUbicacion = locationObj &&
+                                locationObj.latitude !== null &&
+                                locationObj.longitude !== null &&
+                                locationObj.latitude !== undefined &&
+                                locationObj.longitude !== undefined &&
+                                !isNaN(Number(locationObj.latitude)) &&
+                                !isNaN(Number(locationObj.longitude));
 
-    new mapboxgl.Marker(el)
-      .setLngLat([task.Location.longitude, task.Location.latitude])
-      .setPopup(popup)
-      .addTo(this.map);
-  });
-}
+          if (!tieneUbicacion) {
+            console.log('⚠️ Tarea SIN ubicación válida:', {
+              title: t.title,
+              Location: t.Location,
+              locationAlt: (t as any).location,
+              hasLatLng: !!(locationObj?.latitude && locationObj?.longitude)
+            });
+          } else {
+            console.log('✅ Tarea CON ubicación válida:', {
+              title: t.title,
+              coordinates: [locationObj.longitude, locationObj.latitude]
+            });
+          }
 
-map!: mapboxgl.Map;
+          return tieneUbicacion;
+        });
 
+        console.log('📍 Total de tareas con ubicación válida:', this.tasks.length);
+        console.log('📊 Total de tareas recibidas:', res.length);
 
-  directionsClient: any;
+        if (this.tasks.length > 0) {
+          // ✅ Primero agregar marcadores, luego verificar proximidad
+          this.agregarMarcadoresDeTareas();
+          this.checkNearbyTasks();
 
-  constructor(private locationService: LocationService
-              , private taskService: TaskService
-  ) {
-   this.directionsClient = mbxDirections({
-  accessToken: 'pk.eyJ1IjoidGhvbWFza2x6IiwiYSI6ImNsM3VibWJwbTI4emkzZXBlamVjOHp0Z2YifQ.QhFxYxdIC2m4vGlEkMqrow'
-});
-  }
-
-
-
-seleccionarUbicacionParaTarea() {
-  alert('Haz clic en el mapa para seleccionar una ubicación para la tarea.');
-
-  const clickHandler = (e: mapboxgl.MapMouseEvent) => {
-    const { lng, lat } = e.lngLat;
-    this.map.off('click', clickHandler);
-
-    const nombre = prompt('Nombre de la ubicación para tarea:', 'Ubicación para tarea');
-    if (!nombre || nombre.trim() === '') {
-      alert('Nombre inválido');
-      return;
-    }
-
-    const nuevaUbicacion: Location = {
-      name: nombre.trim(),
-      latitude: lat,
-      longitude: lng,
-      geofence_radius: 100
-    };
-
-    // Guarda la ubicación
-    this.locationService.createLocation(nuevaUbicacion).subscribe({
-      next: res => {
-        console.log('Ubicación guardada para tarea:', res);
-        this.locations.push(res);
-
-        // Almacena el ID para que lo uses en el modal
-        localStorage.setItem('ubicacionParaTarea', res.id!.toString());
-        alert('Ubicación guardada y lista para usar en una nueva tarea.');
-
-        // Podrías redirigir o abrir el modal de nueva tarea automáticamente aquí
+          // ✅ Centrar el mapa para mostrar todas las tareas
+          this.ajustarVistaParaTareas();
+        } else {
+          console.log('❌ No hay tareas con ubicación para mostrar');
+          console.log('💡 Revisa el backend - las tareas deben incluir relación con Location');
+        }
       },
-      error: err => {
-        console.error('Error al guardar ubicación para tarea', err);
-        alert('Error al guardar ubicación');
+      error: (err) => {
+        console.error('❌ Error al obtener tareas:', err);
+        alert('Error al cargar las tareas del mapa');
       }
     });
-  };
-
-  this.map.on('click', clickHandler);
-}
-cargarTareasConUbicacion() {
-  this.taskService.getTasks().subscribe({
-    next: (res) => {
-       console.log('Tareas crudas:', res);
-      this.tasks = res.filter(t => t.Location); // Solo tareas con ubicación
-      this.agregarMarcadoresDeTareas();
-      this.checkNearbyTasks();       // ✅ Mover aquí
-      this.filtrarTareas();          // ✅ Mover aquí
-    },
-    error: (err) => {
-      console.error('Error al obtener tareas', err);
-    }
-  });
-}
-
-async calcularRuta(start: [number, number], end: [number, number]) {
-  const response = await this.directionsClient.getDirections({
-    profile: 'driving',
-    geometries: 'geojson',
-    waypoints: [
-      { coordinates: start },
-      { coordinates: end }
-    ]
-  }).send();
-
-  const ruta = response.body.routes[0].geometry;
-
-  // ✅ Elimina la ruta anterior
-  if (this.map.getLayer('route')) {
-    this.map.removeLayer('route');
-  }
-  if (this.map.getSource('route')) {
-    this.map.removeSource('route');
   }
 
-  this.map.addSource('route', {
-    type: 'geojson',
-    data: {
-      type: 'Feature',
-      geometry: ruta,
-      properties: {}
-    }
-  });
+  agregarMarcadoresDeTareas() {
+    console.log('🏷️ Agregando marcadores de tareas al mapa...');
 
-  this.map.addLayer({
-    id: 'route',
-    type: 'line',
-    source: 'route',
-    layout: {
-      'line-join': 'round',
-      'line-cap': 'round'
-    },
-    paint: {
-      'line-color': '#3b9ddd',
-      'line-width': 6
-    }
-  });
-}
+    // ✅ Limpiar marcadores existentes antes de agregar nuevos
+    const existingTaskMarkers = document.querySelectorAll('.task-marker');
+    existingTaskMarkers.forEach(marker => marker.remove());
 
-agregarMarcadoresDeTareas() {
-  this.tasks.forEach(task => {
-    if (!task.Location) return;
+    this.tasks.forEach((task, index) => {
+      // ✅ Obtener ubicación de diferentes propiedades posibles
+      const locationObj = task.Location || (task as any).location || (task as any).position;
 
-    const el = document.createElement('div');
-  el.className = 'marker task-marker';
-el.style.backgroundImage = 'url(assets/icon/task-marker.png)';
-el.style.backgroundSize = 'contain';
-el.style.backgroundRepeat = 'no-repeat';
-el.style.backgroundPosition = 'center';
+      if (!task?.id || !locationObj) {
+        console.log('⚠️ Saltando tarea sin ID o ubicación:', task);
+        return;
+      }
 
-    el.style.width = '32px';
-    el.style.height = '32px';
-    el.style.backgroundSize = 'cover';
+      // Asegurar que las coordenadas sean números
+      const longitude = Number(locationObj.longitude);
+      const latitude = Number(locationObj.latitude);
 
-    const popupHtml = `
-      <strong>${task.title}</strong><br>
-      Categoría: ${task.category}<br>
-      Estado: ${task.status}<br>
-      <button id="go-to-task-${task.id}">Ir Aquí</button>
-    `;
+      if (isNaN(longitude) || isNaN(latitude)) {
+        console.log('⚠️ Coordenadas inválidas para tarea:', task.title, { longitude, latitude });
+        return;
+      }
 
-    const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(popupHtml);
+      console.log(`📌 Agregando marcador para tarea ${index + 1}:`, {
+        title: task.title,
+        coordinates: [longitude, latitude],
+        originalCoords: [locationObj.longitude, locationObj.latitude]
+      });
 
-    const marker = new mapboxgl.Marker(el)
-      .setLngLat([task.Location.longitude, task.Location.latitude])
-      .setPopup(popup)
-      .addTo(this.map);
+      // Crear elemento del marcador
+      const el = document.createElement('div');
+      el.className = 'marker task-marker';
 
-    // Esperamos a que el popup se abra para agregar el event listener al botón
-    marker.getElement().addEventListener('click', () => {
-      setTimeout(() => {
-        const button = document.getElementById(`go-to-task-${task.id}`);
-        if (button) {
-          button.addEventListener('click', () => {
-            if (this.currentCoords) {
-              this.calcularRuta(
-                [this.currentCoords.lng, this.currentCoords.lat],
-                [task.Location!.longitude, task.Location!.latitude]
-              );
-            } else {
-              alert('No se pudo obtener tu ubicación actual.');
-            }
-          });
-        }
-      }, 500); // tiempo de espera para asegurar que el DOM del popup se renderice
+      // ✅ Solo usar la imagen del marcador, sin fondo de respaldo
+      el.style.backgroundImage = 'url(assets/icon/task-marker.png)';
+      el.style.backgroundSize = 'contain';
+      el.style.backgroundRepeat = 'no-repeat';
+      el.style.backgroundPosition = 'center';
+      el.style.width = '32px';
+      el.style.height = '32px';
+      el.style.cursor = 'pointer';
+
+      // Crear popup con información de la tarea
+      const popupHtml = `
+        <div style="padding: 10px; min-width: 200px;">
+          <h4 style="margin: 0 0 8px 0; color: #333;">${task.title || 'Sin título'}</h4>
+          <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">${task.description || 'Sin descripción'}</p>
+          <div style="margin-bottom: 8px;">
+            <span style="background: #007bff; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+              ${task.category || 'Sin categoría'}
+            </span>
+            <span style="background: ${task.status === 'completed' ? '#28a745' : '#ffc107'}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 5px;">
+              ${task.status || 'pendiente'}
+            </span>
+          </div>
+          <button id="go-to-task-${task.id}" style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; width: 100%;">
+            📍 Trazar ruta
+          </button>
+        </div>
+      `;
+
+      const popup = new mapboxgl.Popup({
+        offset: 25,
+        closeButton: true,
+        closeOnClick: false
+      }).setHTML(popupHtml);
+
+      // Crear y agregar el marcador
+      const marker = new mapboxgl.Marker(el)
+        .setLngLat([longitude, latitude])
+        .setPopup(popup)
+        .addTo(this.map);
+
+      console.log(`✅ Marcador agregado para "${task.title}" en:`, [longitude, latitude]);
+
+      // ✅ Agregar event listener para el botón de ruta
+      marker.getElement().addEventListener('click', () => {
+        setTimeout(() => {
+          const button = document.getElementById(`go-to-task-${task.id}`);
+          if (button) {
+            button.addEventListener('click', () => {
+              if (this.currentCoords) {
+                console.log('🗺️ Calculando ruta hacia:', task.title);
+                this.calcularRuta(
+                  [this.currentCoords.lng, this.currentCoords.lat],
+                  [longitude, latitude]
+                );
+              } else {
+                alert('No se pudo obtener tu ubicación actual.');
+              }
+            });
+          }
+        }, 100);
+      });
     });
-  });
-}
 
+    console.log(`✅ Total de marcadores agregados: ${this.tasks.length}`);
+  }
 
-async ngAfterViewInit() {
-  await this.getCurrentPosition();
-  this.cargarTareasConUbicacion(); // todo se desencadena aquí
-}
+  filtrarTareas() {
+    console.log('🔍 Filtrando tareas por categoría:', this.filtroCategoria);
 
-  async getCurrentPosition() {
-    const coordinates = await Geolocation.getCurrentPosition();
-    const { latitude, longitude } = coordinates.coords;
-    this.currentCoords = { lat: latitude, lng: longitude };
-    this.cargarMapa(longitude, latitude);
-    console.log('Posición actual:', latitude, longitude);
+    const tareasFiltradas = this.tasks.filter(t =>
+      this.filtroCategoria === 'all' || t.category === this.filtroCategoria
+    );
+
+    console.log(`📊 Tareas después del filtro: ${tareasFiltradas.length} de ${this.tasks.length}`);
+
+    // Limpiar marcadores existentes
+    const existingTaskMarkers = document.querySelectorAll('.task-marker');
+    existingTaskMarkers.forEach(marker => marker.remove());
+
+    // Agregar marcadores filtrados
+    tareasFiltradas.forEach(task => {
+      if (!task.Location) return;
+
+      const el = document.createElement('div');
+      el.className = 'marker task-marker';
+      el.style.backgroundImage = 'url(./assets/icon/task-marker.png)';
+      el.style.width = '32px';
+      el.style.height = '32px';
+
+      const popup = new mapboxgl.Popup({ offset: 25 }).setText(
+        `${task.title} (${task.category}) - ${task.status}`
+      );
+
+      new mapboxgl.Marker(el)
+        .setLngLat([task.Location.longitude, task.Location.latitude])
+        .setPopup(popup)
+        .addTo(this.map);
+    });
+  }
+
+  async calcularRuta(start: [number, number], end: [number, number]) {
+    try {
+      console.log('🗺️ Calculando ruta desde:', start, 'hasta:', end);
+
+      const response = await this.directionsClient.getDirections({
+        profile: 'driving',
+        geometries: 'geojson',
+        waypoints: [
+          { coordinates: start },
+          { coordinates: end }
+        ]
+      }).send();
+
+      const ruta = response.body.routes[0].geometry;
+
+      // Eliminar ruta anterior si existe
+      if (this.map.getLayer('route')) {
+        this.map.removeLayer('route');
+      }
+      if (this.map.getSource('route')) {
+        this.map.removeSource('route');
+      }
+
+      // Agregar nueva ruta
+      this.map.addSource('route', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          geometry: ruta,
+          properties: {}
+        }
+      });
+
+      this.map.addLayer({
+        id: 'route',
+        type: 'line',
+        source: 'route',
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#3b9ddd',
+          'line-width': 6
+        }
+      });
+
+      console.log('✅ Ruta trazada exitosamente');
+    } catch (error) {
+      console.error('❌ Error al calcular ruta:', error);
+      alert('Error al calcular la ruta');
+    }
   }
 
   cargarUbicaciones() {
-  this.locationService.getAllLocations().subscribe({
-    next: (res) => {
-      this.locations = res;
-      console.log('Ubicaciones cargadas:', this.locations);
-    },
-    error: (err) => {
-      console.error('Error al cargar ubicaciones', err);
-      alert('Error al cargar ubicaciones');
+    this.locationService.getAllLocations().subscribe({
+      next: (res) => {
+        this.locations = res;
+        console.log('📍 Ubicaciones cargadas:', this.locations.length);
+      },
+      error: (err) => {
+        console.error('❌ Error al cargar ubicaciones:', err);
+        alert('Error al cargar ubicaciones');
+      }
+    });
+  }
+
+  checkNearbyTasks() {
+    if (!this.currentCoords) {
+      console.log('⚠️ No hay coordenadas actuales para verificar proximidad');
+      return;
     }
-  });
-}
-checkNearbyTasks() {
-  if (!this.currentCoords) return;
 
-  const { lat: userLat, lng: userLng } = this.currentCoords;
+    const { lat: userLat, lng: userLng } = this.currentCoords;
+    console.log('🔍 Verificando tareas cercanas desde:', { userLat, userLng });
 
-  this.tasks.forEach(task => {
-    if (!task.Location) return;
-    const { latitude, longitude, geofence_radius } = task.Location;
+    this.tasks.forEach(task => {
+      const locationObj = task.Location || (task as any).location || (task as any).position;
+      if (!locationObj) return;
 
-    const distance = this.getDistanceInMeters(userLat, userLng, latitude, longitude);
-    if (distance <= (geofence_radius ?? 100)) {
-      alert(`🟢 Estás cerca de la tarea: ${task.title}`);
+      const { latitude, longitude, geofence_radius } = locationObj;
+      const distance = this.getDistanceInMeters(userLat, userLng, Number(latitude), Number(longitude));
+      const radius = geofence_radius || 100;
+
+      console.log(`📏 Distancia a "${task.title}": ${distance.toFixed(2)}m (radio: ${radius}m)`);
+
+      if (distance <= radius) {
+        console.log(`🟢 Tarea cercana detectada: ${task.title}`);
+        alert(`🟢 Estás cerca de la tarea: ${task.title}`);
+      }
+    });
+  }
+
+  ajustarVistaParaTareas() {
+    if (this.tasks.length === 0) return;
+
+    // Crear límites (bounds) que incluyan todas las tareas
+    const bounds = new mapboxgl.LngLatBounds();
+
+    // Agregar ubicación actual a los límites
+    if (this.currentCoords) {
+      bounds.extend([this.currentCoords.lng, this.currentCoords.lat]);
     }
-  });
-}
 
-getDistanceInMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371000; // Radio de la Tierra en metros
-  const φ1 = lat1 * Math.PI / 180;
-  const φ2 = lat2 * Math.PI / 180;
-  const Δφ = (lat2 - lat1) * Math.PI / 180;
-  const Δλ = (lon2 - lon1) * Math.PI / 180;
+    // Agregar cada tarea a los límites
+    this.tasks.forEach(task => {
+      const locationObj = task.Location || (task as any).location || (task as any).position;
+      if (locationObj) {
+        const lng = Number(locationObj.longitude);
+        const lat = Number(locationObj.latitude);
+        bounds.extend([lng, lat]);
+        console.log(`📍 Agregando a bounds: [${lng}, ${lat}] para "${task.title}"`);
+      }
+    });
 
-  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    // Ajustar la vista del mapa para mostrar todos los puntos
+    this.map.fitBounds(bounds, {
+      padding: 50, // Padding en píxeles
+      maxZoom: 15  // Zoom máximo para no acercarse demasiado
+    });
 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
-}
+    console.log('🎯 Vista del mapa ajustada para mostrar todas las tareas');
+  }
+
+  getDistanceInMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371000; // Radio de la Tierra en metros
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  seleccionarUbicacionParaTarea() {
+    alert('Haz clic en el mapa para seleccionar una ubicación para la tarea.');
+
+    const clickHandler = (e: mapboxgl.MapMouseEvent) => {
+      const { lng, lat } = e.lngLat;
+      this.map.off('click', clickHandler);
+
+      const nombre = prompt('Nombre de la ubicación para tarea:', 'Ubicación para tarea');
+      if (!nombre || nombre.trim() === '') {
+        alert('Nombre inválido');
+        return;
+      }
+
+      const nuevaUbicacion: Location = {
+        name: nombre.trim(),
+        latitude: lat,
+        longitude: lng,
+        geofence_radius: 100
+      };
+
+      this.locationService.createLocation(nuevaUbicacion).subscribe({
+        next: res => {
+          console.log('Ubicación guardada para tarea:', res);
+          this.locations.push(res);
+          localStorage.setItem('ubicacionParaTarea', res.id!.toString());
+          alert('Ubicación guardada y lista para usar en una nueva tarea.');
+        },
+        error: err => {
+          console.error('Error al guardar ubicación para tarea', err);
+          alert('Error al guardar ubicación');
+        }
+      });
+    };
+
+    this.map.on('click', clickHandler);
+  }
 
   guardarUbicacion() {
     alert('Haz clic en el mapa para seleccionar la ubicación que deseas guardar.');
@@ -354,7 +515,7 @@ getDistanceInMeters(lat1: number, lon1: number, lat2: number, lon2: number): num
           console.log('Ubicación guardada:', res);
           this.lastLocationId = res.id as number;
           alert('Ubicación guardada correctamente');
-          this.locations.push(res); // actualiza lista local
+          this.locations.push(res);
         },
         error: err => {
           console.error('Error al guardar ubicación', err);
@@ -418,27 +579,26 @@ getDistanceInMeters(lat1: number, lon1: number, lat2: number, lon2: number): num
   }
 
   eliminarUbicacion() {
-  const locationId = this.selectedLocationId; // ✅ Aquí el cambio
-  if (!locationId) {
-    alert('Debes seleccionar una ubicación para eliminar');
-    return;
-  }
-
-  const confirmacion = confirm('¿Estás seguro de que deseas eliminar esta ubicación?');
-  if (!confirmacion) return;
-
-  this.locationService.deleteLocation(locationId).subscribe({
-    next: res => {
-      console.log('Ubicación eliminada:', res);
-      alert('Ubicación eliminada correctamente');
-      this.locations = this.locations.filter(loc => loc.id !== locationId);
-      this.selectedLocationId = null;
-    },
-    error: err => {
-      console.error('Error al eliminar ubicación', err);
-      alert('Error al eliminar ubicación');
+    const locationId = this.selectedLocationId;
+    if (!locationId) {
+      alert('Debes seleccionar una ubicación para eliminar');
+      return;
     }
-  });
-}
 
+    const confirmacion = confirm('¿Estás seguro de que deseas eliminar esta ubicación?');
+    if (!confirmacion) return;
+
+    this.locationService.deleteLocation(locationId).subscribe({
+      next: res => {
+        console.log('Ubicación eliminada:', res);
+        alert('Ubicación eliminada correctamente');
+        this.locations = this.locations.filter(loc => loc.id !== locationId);
+        this.selectedLocationId = null;
+      },
+      error: err => {
+        console.error('Error al eliminar ubicación', err);
+        alert('Error al eliminar ubicación');
+      }
+    });
+  }
 }
