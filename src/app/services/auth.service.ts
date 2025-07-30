@@ -226,4 +226,8 @@ export class AuthService {
       return { success: false, message: 'Error refreshing token' };
     }
   }
+  isLoggedIn(): boolean {
+    const token = localStorage.getItem('token');
+    return !!token;
+  }
 }
