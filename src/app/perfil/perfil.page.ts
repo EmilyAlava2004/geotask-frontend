@@ -1,42 +1,35 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons } from '@ionic/angular/standalone';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TaskService } from '../services/task.service';
 import { UserService } from '../services/user.service';
 
 import {
+  IonContent,
+  IonHeader,
+  IonTitle,
+  IonToolbar,
+  IonButtons,
   IonButton,
   IonIcon,
   IonAvatar,
   IonItem,
   IonLabel,
   IonInput,
-  IonToggle,
   IonSpinner,
   AlertController,
   ToastController,
-  ActionSheetController,
-  ModalController,
   LoadingController
 } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
 
+import { addIcons } from 'ionicons';
 import {
   create,
   checkmark,
-  camera,
   person,
-  settings,
-  location,
-  save,
-  close,
-  key,
-  download,
   logOut,
-  chevronForward,
+  close,
   personCircleOutline
 } from 'ionicons/icons';
 
@@ -45,20 +38,6 @@ interface User {
   name: string;
   email: string;
   phone?: string;
-  position?: string;
-  avatar?: string;
-  defaultLocation?: {
-    name: string;
-    address: string;
-    lat: number;
-    lng: number;
-  };
-  settings: {
-    pushNotifications: boolean;
-    locationNotifications: boolean;
-    offlineMode: boolean;
-    notificationRadius: number;
-  };
 }
 
 interface TaskStats {
@@ -91,45 +70,28 @@ interface TaskStats {
   ]
 })
 export class PerfilPage implements OnInit {
-
-
   profileForm: FormGroup;
   isEditMode = false;
   isLoading = false;
+  personid: string;
 
   // Datos del usuario
   user: User = {
-    id: '1',
-    name: 'Juan Pérez',
-    email: 'juan.perez@email.com',
-    phone: '+1 234 567 8900',
-    position: 'Gerente de Proyecto',
-    avatar: 'assets/images/profile-avatar.jpg',
-    defaultLocation: {
-      name: 'Oficina Central',
-      address: 'Calle Principal 123, Ciudad',
-      lat: -34.6037,
-      lng: -58.3816
-    },
-    settings: {
-      pushNotifications: true,
-      locationNotifications: true,
-      offlineMode: false,
-      notificationRadius: 500
-    }
+    id: '',
+    name: '',
+    email: '',
+    phone: ''
   };
+
+  // Datos del perfil del backend
+  profile: any = {};
 
   // Estadísticas de tareas
   taskStats: TaskStats = {
-    total: 25,
-    completed: 18,
-    pending: 7
+    total: 0,
+    completed: 0,
+    pending: 0
   };
-
-
-  personid: any;
-  profile: any = {};
-  userData : any = {};
 
   // Backup de datos originales
   private originalUserData: User;
@@ -139,27 +101,19 @@ export class PerfilPage implements OnInit {
     private formBuilder: FormBuilder,
     private alertController: AlertController,
     private toastController: ToastController,
-    private actionSheetController: ActionSheetController,
-    private modalController: ModalController,
     private taskService: TaskService,
     private loadingController: LoadingController,
     private userService: UserService
   ) {
-     this.personid = localStorage.getItem('id');
-    // Registrar iconos
+    this.personid = localStorage.getItem('id') || '';
+
+    // Registrar iconos necesarios
     addIcons({
       create,
       checkmark,
-      camera,
       person,
-      settings,
-      location,
-      save,
-      close,
-      key,
-      download,
       'log-out': logOut,
-      'chevron-forward': chevronForward,
+      close,
       personCircleOutline
     });
 
@@ -167,74 +121,57 @@ export class PerfilPage implements OnInit {
     this.profileForm = this.formBuilder.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.pattern(/^\+?[1-9]\d{1,14}$/)]],
-      position: [''],
-      pushNotifications: [true],
-      locationNotifications: [true],
-      offlineMode: [false],
-      notificationRadius: [500, [Validators.min(50), Validators.max(2000)]]
+      phone: ['', [Validators.pattern(/^\+?[1-9]\d{1,14}$/)]]
     });
 
-    // Guardar datos originales
-    this.originalUserData = JSON.parse(JSON.stringify(this.user));
+    this.originalUserData = { ...this.user };
   }
-
-
 
   ngOnInit() {
+    this.loadProfile();
     this.loadTaskStats();
-    this.viewProfile();
+
+    // Suscribirse a cambios en las tareas
     this.taskService.tasksChanged$.subscribe(() => {
       this.loadTaskStats();
-  });
+    });
   }
-  viewProfile() {
-  if (!this.personid) {
-    console.error('No hay ID de usuario en localStorage');
-    return;
-  }
-
-  this.userService.getOneUser(this.personid).subscribe({
-    next: (data: any) => {
-      if (!data?.user) {
-        console.error('La respuesta del backend no contiene un objeto user válido');
-        return;
-      }
-
-      this.profile = data;
-      const userData = this.profile.user;
-
-      // Guardamos los datos reales en el objeto user
-      this.user = {
-        ...this.user,
-        id: userData.id,
-        name: userData.user || '', // Asegúrate que "user" es una propiedad del backend
-        email: userData.email || '',
-        phone: userData.numero || '',
-      };
-
-      // Hacemos backup para el cancelEdit()
-      this.originalUserData = JSON.parse(JSON.stringify(this.user));
-
-      // Actualizamos el formulario con los datos obtenidos
-      this.profileForm.patchValue({
-        name: this.user.name,
-        email: this.user.email,
-        phone: this.user.phone,
-      });
-    },
-    error: () => {
-      console.error('Error al cargar el perfil');
-    },
-  });
-}
-
-
-
 
   /**
-   * Cargar datos del usuario
+   * Cargar perfil del usuario
    */
+  loadProfile() {
+    if (!this.personid) {
+      console.error('No hay ID de usuario en localStorage');
+      return;
+    }
+
+    this.userService.getOneUser(this.personid).subscribe({
+      next: (data: any) => {
+        if (!data?.user) {
+          console.error('La respuesta del backend no contiene un objeto user válido');
+          return;
+        }
+
+        this.profile = data;
+        const userData = data.user;
+
+        this.user = {
+          id: userData.id,
+          name: userData.user || '',
+          email: userData.email || '',
+          phone: userData.numero || ''
+        };
+
+        this.originalUserData = { ...this.user };
+        this.updateFormWithUserData();
+      },
+      error: (error) => {
+        console.error('Error al cargar el perfil:', error);
+        this.showToast('Error al cargar el perfil', 'danger');
+      }
+    });
+  }
 
   /**
    * Actualizar formulario con datos del usuario
@@ -243,7 +180,7 @@ export class PerfilPage implements OnInit {
     this.profileForm.patchValue({
       name: this.user.name,
       email: this.user.email,
-      phone: this.user.phone,
+      phone: this.user.phone
     });
   }
 
@@ -251,19 +188,19 @@ export class PerfilPage implements OnInit {
    * Cargar estadísticas de tareas
    */
   private loadTaskStats() {
-  this.taskService.getTasks().subscribe({
-    next: (tasks) => {
-      const total = tasks.length;
-      const completed = tasks.filter(t => t.status === 'completed').length;
-      const pending = total - completed;
+    this.taskService.getTasks().subscribe({
+      next: (tasks) => {
+        const total = tasks.length;
+        const completed = tasks.filter(t => t.status === 'completed').length;
+        const pending = total - completed;
 
-      this.taskStats = { total, completed, pending };
-    },
-    error: (error) => {
-      console.error('Error al obtener estadísticas de tareas:', error.message);
-    }
-  });
-}
+        this.taskStats = { total, completed, pending };
+      },
+      error: (error) => {
+        console.error('Error al obtener estadísticas de tareas:', error);
+      }
+    });
+  }
 
   /**
    * Alternar modo de edición
@@ -287,25 +224,33 @@ export class PerfilPage implements OnInit {
 
     this.isLoading = true;
 
-
     try {
-      // Simular llamada a la API
-      await this.delay(2000);
-
-      // Actualizar datos del usuario
       const formData = this.profileForm.value;
+
+      // Simular delay para mostrar loading
+      await this.delay(1500);
+
+      // Aquí harías la llamada real al backend para actualizar
+      // await this.userService.updateUser(this.user.id, formData);
+
+      // Por ahora solo actualizamos localmente
       this.user = {
         ...this.user,
         name: formData.name,
         email: formData.email,
-        phone: formData.phone,
+        phone: formData.phone
       };
 
+      // Actualizar también los datos del profile para la vista
+      if (this.profile?.user) {
+        this.profile.user.user = formData.name;
+        this.profile.user.email = formData.email;
+        this.profile.user.numero = formData.phone;
+      }
 
-      // Actualizar backup
-      this.originalUserData = JSON.parse(JSON.stringify(this.user));
-
+      this.originalUserData = { ...this.user };
       this.isEditMode = false;
+
       await this.showToast('Perfil actualizado correctamente', 'success');
 
     } catch (error) {
@@ -321,103 +266,9 @@ export class PerfilPage implements OnInit {
    */
   cancelEdit() {
     this.isEditMode = false;
-    this.user = JSON.parse(JSON.stringify(this.originalUserData));
+    this.user = { ...this.originalUserData };
     this.updateFormWithUserData();
   }
-
-  /**
-   * Cambiar foto de perfil
-   */
-  async changeProfilePhoto() {
-    const actionSheet = await this.actionSheetController.create({
-      header: 'Cambiar foto de perfil',
-      buttons: [
-        {
-          text: 'Tomar foto',
-          icon: 'camera',
-          handler: () => {
-            this.takePhoto();
-          }
-        },
-        {
-          text: 'Seleccionar de galería',
-          icon: 'images',
-          handler: () => {
-            this.selectFromGallery();
-          }
-        },
-        {
-          text: 'Cancelar',
-          icon: 'close',
-          role: 'cancel'
-        }
-      ]
-    });
-    await actionSheet.present();
-  }
-
-  /**
-   * Tomar foto con la cámara
-   */
-  private async takePhoto() {
-    try {
-      // Aquí implementarías la funcionalidad de cámara con Capacitor
-      await this.delay(1000);
-      await this.showToast('Funcionalidad de cámara pendiente de implementar', 'primary');
-    } catch (error) {
-      console.error('Error taking photo:', error);
-    }
-  }
-
-  /**
-   * Seleccionar foto de galería
-   */
-  private async selectFromGallery() {
-    try {
-      // Aquí implementarías la selección de galería con Capacitor
-      await this.delay(1000);
-      await this.showToast('Funcionalidad de galería pendiente de implementar', 'primary');
-    } catch (error) {
-      console.error('Error selecting from gallery:', error);
-    }
-  }
-
-
-  /**
-   * Cambiar contraseña
-   */
-  async changePassword() {
-    const alert = await this.alertController.create({
-      header: 'Cambiar Contraseña',
-      message: '¿Deseas cambiar tu contraseña? Se enviará un enlace a tu email.',
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Enviar enlace',
-          handler: async () => {
-            const loading = await this.loadingController.create({
-              message: 'Enviando enlace...'
-            });
-            await loading.present();
-            try {
-              await this.delay(2000);
-              await this.showToast('Enlace enviado a tu email', 'success');
-            } catch (error) {
-              await this.showToast('Error al enviar enlace', 'danger');
-            } finally {
-              await loading.dismiss();
-            }
-          }
-        }
-      ]
-    });
-
-    await alert.present();
-  }
-
 
   /**
    * Cerrar sesión
@@ -442,16 +293,11 @@ export class PerfilPage implements OnInit {
             try {
               await this.delay(1500);
 
-              // Aquí implementarías la lógica de logout
-              // Por ejemplo, limpiar tokens, storage local, etc.
               localStorage.clear();
               sessionStorage.clear();
 
-
               await this.showToast('Sesión cerrada correctamente', 'success');
               this.router.navigate(['/login']);
-              // Navegar a la página de login
-              // this.router.navigate(['/auth/login']);
 
             } catch (error) {
               console.error('Error during logout:', error);
@@ -463,7 +309,6 @@ export class PerfilPage implements OnInit {
         }
       ]
     });
-
 
     await alert.present();
   }
@@ -495,16 +340,14 @@ export class PerfilPage implements OnInit {
   }
 
   /**
-   * Validar si el formulario tiene cambios
+   * Verificar si el formulario tiene cambios
    */
   hasChanges(): boolean {
     const formData = this.profileForm.value;
     return (
       formData.name !== this.originalUserData.name ||
       formData.email !== this.originalUserData.email ||
-
       formData.phone !== this.originalUserData.phone
-
     );
   }
 
@@ -525,13 +368,7 @@ export class PerfilPage implements OnInit {
         return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
       }
       if (field.errors['pattern']) {
-        return 'Formato no válido';
-      }
-      if (field.errors['min']) {
-        return `Valor mínimo: ${field.errors['min'].min}`;
-      }
-      if (field.errors['max']) {
-        return `Valor máximo: ${field.errors['max'].max}`;
+        return 'Formato de teléfono no válido';
       }
     }
 
@@ -547,27 +384,7 @@ export class PerfilPage implements OnInit {
   }
 
   /**
-   * Formatear número de teléfono
-   */
-  formatPhoneNumber(phone: string): string {
-    if (!phone) return '';
-
-
-    // Remover caracteres no numéricos excepto +
-    const cleaned = phone.replace(/[^\d+]/g, '');
-
-    // Aplicar formato básico
-    if (cleaned.startsWith('+')) {
-      return cleaned;
-    } else if (cleaned.length === 10) {
-      return `+1 ${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6)}`;
-    }
-
-    return cleaned;
-  }
-
-  /**
-   * Obtener estadísticas en formato de progreso
+   * Obtener porcentaje de completitud de tareas
    */
   getCompletionPercentage(): number {
     if (this.taskStats.total === 0) return 0;
@@ -584,13 +401,4 @@ export class PerfilPage implements OnInit {
     if (percentage >= 60) return 'warning';
     return 'danger';
   }
-
-  /**
-   * Limpiar datos del formulario
-   */
-  resetForm() {
-    this.profileForm.reset();
-    this.updateFormWithUserData();
-  }
-
 }

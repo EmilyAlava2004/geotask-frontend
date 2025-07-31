@@ -1,5 +1,5 @@
 <ion-header>
- <ion-toolbar color="black">
+  <ion-toolbar color="black">
     <ion-title>Perfil</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="toggleEditMode()" fill="clear">
@@ -7,31 +7,21 @@
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
-    </ion-header>
+</ion-header>
 
 <ion-content class="profile-content">
   <!-- Header del perfil con avatar -->
   <div class="profile-header">
     <div class="avatar-container">
       <ion-avatar class="profile-avatar">
-        <img [src]="user.avatar || 'assets/images/default-avatar.png'" [alt]="user.name">
+        <!-- Usar un icono en lugar de imagen -->
+        <ion-icon name="person-circle-outline" class="avatar-icon"></ion-icon>
       </ion-avatar>
-
-      <ion-button
-        *ngIf="isEditMode"
-        fill="clear"
-
-        class="change-photo-btn"
-        (click)="changeProfilePhoto()">
-        <ion-icon name="camera" slot="icon-only"></ion-icon>
-      </ion-button>
     </div>
-
 
     <div class="profile-info">
       <h2 class="profile-name">{{ profile?.user?.user }}</h2>
-<p class="profile-email">{{ profile?.user?.email }}</p>
-
+      <p class="profile-email">{{ profile?.user?.email }}</p>
 
       <div class="profile-stats">
         <div class="stat-item">
@@ -51,69 +41,56 @@
   </div>
 
   <!-- Formulario de perfil -->
+  <form [formGroup]="profileForm">
+    <div class="form-section">
+      <h3 class="section-title">
+        <ion-icon name="person" class="section-icon"></ion-icon>
+        Información Personal
+      </h3>
 
- <form [formGroup]="profileForm">
-  <div class="form-section">
-    <h3 class="section-title">
-      <ion-icon name="person" class="section-icon"></ion-icon>
-      Información Personal
-    </h3>
+      <ion-item>
+        <ion-label position="stacked">Nombre completo</ion-label>
+        <ion-input
+          formControlName="name"
+          [readonly]="!isEditMode"
+          placeholder="Ingresa tu nombre">
+        </ion-input>
+      </ion-item>
 
-    <ion-item>
-      <ion-label position="stacked">Nombre completo</ion-label>
-      <ion-input
-        formControlName="name"
-        [readonly]="!isEditMode"
-        placeholder="Ingresa tu nombre">
-      </ion-input>
-    </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Email</ion-label>
+        <ion-input
+          formControlName="email"
+          type="email"
+          [readonly]="!isEditMode"
+          placeholder="tu@email.com">
+        </ion-input>
+      </ion-item>
 
-    <ion-item>
-      <ion-label position="stacked">Email</ion-label>
-      <ion-input
-        formControlName="email"
-        type="email"
-        [readonly]="!isEditMode"
-        placeholder="tu@email.com">
-      </ion-input>
-    </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Teléfono</ion-label>
+        <ion-input
+          formControlName="phone"
+          type="tel"
+          [readonly]="!isEditMode"
+          placeholder="+1 234 567 8900">
+        </ion-input>
+      </ion-item>
+    </div>
 
-    <ion-item>
-      <ion-label position="stacked">Teléfono</ion-label>
-      <ion-input
-        formControlName="phone"
-        type="tel"
-        [readonly]="!isEditMode"
-        placeholder="+1 234 567 8900">
-      </ion-input>
-    </ion-item>
-  </div>
-
-  <!-- Botones -->
-  <div class="form-buttons" *ngIf="isEditMode">
-    <ion-button expand="full" (click)="updateProfile()" [disabled]="!profileForm.valid">
-      Guardar
-    </ion-button>
-    <ion-button expand="full" fill="outline" color="medium" (click)="cancelEdit()">
-      Cancelar
-    </ion-button>
-  </div>
-</form>
+    <!-- Botones -->
+    <div class="form-buttons" *ngIf="isEditMode">
+      <ion-button expand="full" (click)="updateProfile()" [disabled]="!profileForm.valid">
+        Guardar
+      </ion-button>
+      <ion-button expand="full" fill="outline" color="medium" (click)="cancelEdit()">
+        Cancelar
+      </ion-button>
+    </div>
+  </form>
 
   <!-- Opciones adicionales -->
   <div class="additional-options">
-    <ion-button
-      expand="block"
-      fill="outline"
-      (click)="changePassword()"
-      class="change-password-btn">
-      <ion-icon name="key" slot="start"></ion-icon>
-      Cambiar Contraseña
-    </ion-button>
-
-
-
-
     <ion-button
       expand="block"
       color="danger"
@@ -129,5 +106,4 @@
   <div class="loading-container" *ngIf="isLoading">
     <ion-spinner name="crescent"></ion-spinner>
   </div>
-
 </ion-content>

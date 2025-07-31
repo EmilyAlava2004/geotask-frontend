@@ -1,3 +1,5 @@
+// perfil.page.scss
+
 .profile-content {
   --padding-start: 0;
   --padding-end: 0;
@@ -25,21 +27,21 @@
       position: relative;
       display: inline-block;
       margin-bottom: 1rem;
-      
-  .logo-icon {
-    font-size: 80px;
-    color: #fff;
-    margin-bottom: 1.25rem;
-    background: var(--ion-color-custom);
-    border-radius: 50%;
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1.25rem auto;
-  }
-}
+
+      .avatar-icon, .logo-icon {
+        font-size: 80px;
+        color: #fff;
+        margin-bottom: 1.25rem;
+        background: var(--ion-color-primary);
+        border-radius: 50%;
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.25rem auto;
+      }
+    }
 
     .profile-info {
       .profile-name {
@@ -138,7 +140,7 @@
       }
     }
 
-    .action-buttons {
+    .form-buttons {
       margin-top: 2rem;
 
       .save-btn,
@@ -147,14 +149,11 @@
         --padding-top: 14px;
         --padding-bottom: 14px;
         font-weight: 600;
+        margin-bottom: 0.5rem;
 
         ion-icon {
           margin-right: 0.5rem;
         }
-      }
-
-      .save-btn {
-        margin-bottom: 0.5rem;
       }
 
       .cancel-btn {
@@ -180,11 +179,6 @@
 
       ion-icon {
         margin-right: 0.5rem;
-      }
-
-      &.change-password-btn {
-        --border-color: var(--ion-color-tertiary);
-        --color: var(--ion-color-tertiary);
       }
 
       &.logout-btn {
@@ -224,9 +218,11 @@
     .profile-header {
       padding: 1.5rem 1rem;
 
-      .avatar-container .profile-avatar {
-        width: 80px;
-        height: 80px;
+      .avatar-container .avatar-icon,
+      .avatar-container .logo-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 60px;
       }
 
       .profile-info {
