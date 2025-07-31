@@ -34,6 +34,7 @@ export class AppComponent {
 
   this.applyTheme(theme);
 }
+
 applyTheme(theme: string) {
   let appliedTheme = theme;
 

@@ -1,123 +1,61 @@
-// Forzar modo claro globalmente
-:root {
-  --ion-background-color: #ffffff;
-  --ion-background-color-rgb: 255, 255, 255;
-  --ion-text-color: #000000;
-  --ion-text-color-rgb: 0, 0, 0;
-  --ion-color-step-50: #f2f2f2;
-  --ion-color-step-100: #e6e6e6;
-  --ion-color-step-150: #d9d9d9;
-  --ion-color-step-200: #cccccc;
-  --ion-color-step-250: #bfbfbf;
-  --ion-color-step-300: #b3b3b3;
-  --ion-color-step-350: #a6a6a6;
-  --ion-color-step-400: #999999;
-  --ion-color-step-450: #8c8c8c;
-  --ion-color-step-500: #808080;
-  --ion-color-step-550: #737373;
-  --ion-color-step-600: #666666;
-  --ion-color-step-650: #595959;
-  --ion-color-step-700: #4d4d4d;
-  --ion-color-step-750: #404040;
-  --ion-color-step-800: #333333;
-  --ion-color-step-850: #262626;
-  --ion-color-step-900: #1a1a1a;
-  --ion-color-step-950: #0d0d0d;
-}
-
-// Forzar fondo blanco en el cuerpo de la aplicación
-ion-app {
-  background-color: #ffffff !important;
-}
+// Usa variables CSS para colores, para que cambien con el atributo color-theme
 
 ion-content {
-  --background: #ffffff !important;
-  --color: #000000 !important;
+  --background: var(--ion-background-color);
+  --color: var(--ion-text-color);
 }
 
-ion-header {
-  ion-toolbar {
-    --background: #ffffff;
-    --color: #000000;
-    --border-color: #e0e0e0;
-    --border-width: 0 0 1px 0;
-    --border-style: solid;
-    height: 56px;
+ion-header ion-toolbar {
+  --background: var(--ion-background-color);
+  --color: var(--ion-text-color);
+  --border-color: var(--ion-color-step-250);
+  --border-width: 0 0 1px 0;
+  --border-style: solid;
+  height: 56px;
 
-    .custom-title {
-      text-align: center;
-      padding: 0;
+  .custom-title {
+    text-align: center;
+    padding: 0;
 
-      .title-container {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end; 
-        gap: 10px;
-        height: 100%;
+    .title-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      height: 100%;
 
-        .app-logo {
-          height: 32px;
-          width: auto;
-          max-width: 120px;
-          object-fit: contain;
-          filter: none;
-          margin: 15px ;
-        }
+      .app-logo {
+        height: 32px;
+        width: auto;
+        max-width: 120px;
+        object-fit: contain;
+        filter: none;
+        margin: 15px;
       }
     }
+  }
 
-    ion-buttons {
-      ion-button {
-        --color: #666666;
-        --padding-start: 8px;
-        --padding-end: 8px;
+  ion-buttons ion-button {
+    --color: var(--ion-color-medium);
+    --padding-start: 8px;
+    --padding-end: 8px;
 
-        &:hover {
-          --background: rgba(0, 0, 0, 0.05);
-          --border-radius: 8px;
-        }
+    &:hover {
+      --background: rgba(0, 0, 0, 0.05);
+      --border-radius: 8px;
+    }
 
-        &[disabled] {
-          --color: #cccccc;
-        }
+    &[disabled] {
+      --color: var(--ion-color-light);
+    }
 
-        ion-icon {
-          font-size: 22px;
-        }
-      }
+    ion-icon {
+      font-size: 22px;
     }
   }
 }
 
-// Responsive para tablets y desktop
-@media (min-width: 768px) {
-  ion-header {
-    ion-toolbar {
-      .custom-title {
-        .title-container {
-          .app-logo {
-            height: 36px;
-            max-width: 140px;
-          }
-
-          .location-indicator {
-            width: 10px;
-            height: 10px;
-
-            &::before {
-              top: -3px;
-              left: -3px;
-              width: 16px;
-              height: 16px;
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-// Estilos para las estadísticas
+// Estadísticas
 .stats-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -128,11 +66,11 @@ ion-header {
     margin: 0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     border-radius: 12px;
-    background-color: #ffffff !important;
+    background-color: var(--ion-item-background);
 
     ion-card-content {
       padding: 12px;
-      background-color: #ffffff !important;
+      background-color: var(--ion-item-background);
     }
 
     .stat-content {
@@ -143,7 +81,7 @@ ion-header {
       ion-icon {
         font-size: 24px;
         min-width: 24px;
-        color: #666666 !important;
+        color: var(--ion-color-medium);
       }
 
       div {
@@ -154,31 +92,31 @@ ion-header {
           margin: 0;
           font-size: 1.2rem;
           font-weight: bold;
-          color: #000000 !important;
+          color: var(--ion-text-color);
         }
 
         p {
           margin: 0;
           font-size: 0.8rem;
-          color: #666666 !important;
+          color: var(--ion-color-medium);
         }
       }
     }
   }
 }
 
-// Estilos del calendario
+// Calendario
 .calendar-card {
   margin: 0 0 16px 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 16px;
-  background-color: #ffffff !important;
+  background-color: var(--ion-item-background);
 
   .calendar-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    
+
     .month-year {
       font-size: 1.1rem;
       font-weight: 600;
@@ -188,13 +126,13 @@ ion-header {
     ion-button {
       --padding-start: 8px;
       --padding-end: 8px;
-      --color: #000000 !important;
+      --color: var(--ion-text-color);
     }
   }
 
   ion-card-content {
     padding: 16px;
-    background-color: #ffffff !important;
+    background-color: var(--ion-item-background);
   }
 
   .calendar-weekdays {
@@ -207,7 +145,7 @@ ion-header {
       text-align: center;
       font-size: 0.8rem;
       font-weight: 600;
-      color: #666666 !important;
+      color: var(--ion-color-medium);
       padding: 8px 0;
     }
   }
@@ -229,12 +167,12 @@ ion-header {
       cursor: pointer;
       transition: all 0.2s ease;
       min-height: 50px;
-      background-color: #ffffff;
+      background-color: var(--ion-item-background);
 
       .day-number {
         font-size: 0.9rem;
         font-weight: 500;
-        color: #000000 !important;
+        color: var(--ion-text-color);
       }
 
       .task-indicators {
@@ -249,15 +187,15 @@ ion-header {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          
+
           &.priority-high {
             background-color: var(--ion-color-danger);
           }
-          
+
           &.priority-medium {
             background-color: var(--ion-color-warning);
           }
-          
+
           &.priority-low {
             background-color: var(--ion-color-success);
           }
@@ -265,20 +203,20 @@ ion-header {
 
         .task-count {
           font-size: 0.6rem;
-          color: #666666 !important;
+          color: var(--ion-color-medium);
           margin-left: 2px;
         }
       }
 
       &.other-month {
         .day-number {
-          color: #cccccc !important;
+          color: var(--ion-color-step-250);
         }
       }
 
       &.today {
         background-color: var(--ion-color-primary-tint);
-        
+
         .day-number {
           color: var(--ion-color-primary);
           font-weight: bold;
@@ -287,7 +225,7 @@ ion-header {
 
       &.selected {
         background-color: var(--ion-color-primary);
-        
+
         .day-number {
           color: white;
           font-weight: bold;
@@ -299,7 +237,7 @@ ion-header {
       }
 
       &.has-tasks {
-        background-color: #f5f5f5;
+        background-color: var(--ion-color-step-50);
       }
 
       &:hover {
@@ -310,12 +248,12 @@ ion-header {
   }
 }
 
-// Estilos para las tareas del día
+// Tareas
 .tasks-card {
   margin: 0 0 16px 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 16px;
-  background-color: #ffffff !important;
+  background-color: var(--ion-item-background);
 
   .task-item {
     --padding-start: 16px;
@@ -323,7 +261,7 @@ ion-header {
     --inner-padding-end: 8px;
     margin-bottom: 8px;
     border-radius: 12px;
-    background-color: #f5f5f5 !important;
+    background-color: var(--ion-color-step-50);
 
     &:last-child {
       margin-bottom: 0;
@@ -334,25 +272,25 @@ ion-header {
         margin: 0 0 4px 0;
         font-size: 1rem;
         font-weight: 600;
-        color: #000000 !important;
+        color: var(--ion-text-color);
 
         &.completed {
           text-decoration: line-through;
-          color: #666666 !important;
+          color: var(--ion-color-medium);
         }
       }
 
       p {
         margin: 2px 0;
         font-size: 0.8rem;
-        color: #666666 !important;
+        color: var(--ion-color-medium);
         display: flex;
         align-items: center;
         gap: 4px;
 
         ion-icon {
           font-size: 14px;
-          color: #666666 !important;
+          color: var(--ion-color-medium);
         }
       }
     }
@@ -369,61 +307,60 @@ ion-header {
       --padding-start: 8px;
       --padding-end: 8px;
       margin-left: 8px;
-      --color: #000000 !important;
+      --color: var(--ion-text-color);
     }
   }
 }
 
-// Estilos para el mensaje sin tareas
+// Mensaje sin tareas
 .no-tasks-card {
   margin: 0 0 16px 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 16px;
-  background-color: #ffffff !important;
+  background-color: var(--ion-item-background);
 
   ion-card-content {
     text-align: center;
     padding: 32px 16px;
-    background-color: #ffffff !important;
+    background-color: var(--ion-item-background);
 
     &.text-center {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 16px;
-      
     }
 
     ion-icon {
       opacity: 0.5;
-      color: #666666 !important;
+      color: var(--ion-color-medium);
     }
 
     h3 {
       margin: 0;
       font-size: 1.1rem;
-      color: #666666 !important;
+      color: var(--ion-color-medium);
     }
 
     p {
       margin: 0;
       font-size: 0.9rem;
-      color: #666666 !important;
+      color: var(--ion-color-medium);
     }
 
     ion-button {
       margin-top: 8px;
       --border-radius: 12px;
-      --color: #5aad85 !important;
+      --color: var(--ion-color-primary);
     }
   }
 }
 
+// Botón flotante
 ion-fab {
-  // Posicionamiento ajustado para evitar conflicto con tabs
-  bottom: 80px !important; // Aumentado desde el bottom para evitar los tabs
+  bottom: 80px !important;
   right: 16px;
-  z-index: 1000; // Asegurar que esté por encima de otros elementos
+  z-index: 1000;
 
   ion-fab-button {
     --background: var(--ion-color-primary);
@@ -446,38 +383,26 @@ ion-fab {
 
 // Responsive para tablets
 @media (min-width: 768px) {
-  .stats-container {
-    max-width: 600px;
-    margin: 0 auto 16px auto;
-  }
-
-  .calendar-card {
-    max-width: 600px;
-    margin: 0 auto 16px auto;
-  }
-
-  .calendar-days {
-    .calendar-day {
-      min-height: 60px;
-      padding: 8px;
-
-      .day-number {
-        font-size: 1rem;
-      }
-
-      .task-indicators {
-        .task-dot {
-          width: 8px;
-          height: 8px;
-        }
-      }
-    }
-  }
-
+  .stats-container,
+  .calendar-card,
   .tasks-card,
   .no-tasks-card {
     max-width: 600px;
     margin: 0 auto 16px auto;
+  }
+
+  .calendar-days .calendar-day {
+    min-height: 60px;
+    padding: 8px;
+
+    .day-number {
+      font-size: 1rem;
+    }
+
+    .task-indicators .task-dot {
+      width: 8px;
+      height: 8px;
+    }
   }
 }
 
@@ -499,7 +424,7 @@ ion-fab {
   animation: slideIn 0.3s ease-out;
 }
 
-// Estados de hover para mejor UX
+// Estados hover para mejor UX
 .task-item:hover {
   background-color: var(--ion-color-primary-tint);
   transition: background-color 0.2s ease;
@@ -510,6 +435,3 @@ ion-fab {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease;
 }
-
-// Los estilos para modo oscuro han sido removidos completamente
-// para mantener siempre el modo claro

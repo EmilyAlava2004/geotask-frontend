@@ -1,5 +1,3 @@
-// Estilos del componente de configuración
-
 .profile-container {
   display: flex;
   flex-direction: column;
@@ -9,17 +7,17 @@
 
   .avatar-container {
     position: relative;
-    
+
     ion-avatar {
       width: 80px;
       height: 80px;
-      
+
       img {
         border-radius: 50%;
         object-fit: cover;
       }
     }
-    
+
     .change-avatar-btn {
       position: absolute;
       bottom: -5px;
@@ -30,108 +28,111 @@
       background: var(--ion-color-primary);
       color: white;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-      
+
       ion-icon {
         font-size: 16px;
       }
     }
   }
-  
+
   .profile-inputs {
     width: 100%;
-    
+
     ion-item {
       --padding-start: 0;
       --inner-padding-end: 0;
-      
+      --border-color: var(--ion-border-color, #ccc);
+
       ion-label {
         font-weight: 500;
-        color: var(--ion-color-medium);
+        color: var(--ion-text-color);
       }
-      
+
       ion-input {
         --padding-top: 8px;
         --padding-bottom: 8px;
+        color: var(--ion-text-color);
       }
     }
   }
 }
 
-// Espaciado entre cards
 ion-card {
   margin: 16px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  
+  background-color: var(--ion-card-background);
+
   ion-card-header {
     padding-bottom: 8px;
-    
+
     ion-card-title {
       font-size: 18px;
       font-weight: 600;
-      color: var(--ion-color-dark);
+      color: var(--ion-text-color);
     }
   }
-  
+
   ion-card-content {
     padding-top: 0;
+    background-color: var(--ion-card-background);
+    color: var(--ion-text-color);
   }
 }
 
-// Estilos para items
 ion-item {
   --padding-start: 16px;
   --inner-padding-end: 16px;
-  --border-color: var(--ion-color-light);
-  
+  --border-color: var(--ion-border-color, #ccc);
+
   ion-label {
     h3 {
       font-size: 16px;
       font-weight: 500;
       margin: 0 0 4px 0;
-      color: var(--ion-color-dark);
+      color: var(--ion-text-color);
     }
-    
+
     p {
       font-size: 14px;
       color: var(--ion-color-medium);
       margin: 0;
     }
   }
-  
+
   ion-toggle {
     --handle-width: 24px;
     --handle-height: 24px;
     --track-width: 48px;
     --track-height: 28px;
   }
-  
+
   ion-select {
     --placeholder-color: var(--ion-color-medium);
+    color: var(--ion-text-color);
   }
-  
+
   ion-note {
     font-size: 14px;
     color: var(--ion-color-medium);
   }
 }
 
-// Estilos para botones
 ion-button {
   --border-radius: 8px;
   height: 44px;
   font-weight: 500;
-  
+  color: var(--ion-text-color);
+
   &[fill="outline"] {
     --border-width: 1.5px;
   }
-  
+
   ion-icon {
     margin-right: 8px;
   }
 }
 
-// Estilos para el range
 ion-range {
   --bar-height: 4px;
   --bar-background: var(--ion-color-light);
@@ -140,62 +141,29 @@ ion-range {
   --knob-size: 20px;
   --pin-background: var(--ion-color-primary);
   --pin-color: white;
-  
+
   padding: 16px 0;
 }
 
-// Responsive design
 @media (min-width: 768px) {
   ion-content {
     max-width: 600px;
     margin: 0 auto;
   }
-  
+
   .profile-container {
     flex-direction: row;
     text-align: left;
-    
+
     .avatar-container {
       flex-shrink: 0;
       margin-right: 24px;
     }
-    
+
     .profile-inputs {
       flex: 1;
     }
   }
 }
 
-// Tema oscuro
-@media (prefers-color-scheme: dark) {
-  ion-card {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
-  
-  .change-avatar-btn {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  }
-}
-
-// Animaciones
-ion-card {
-  transition: transform 0.2s ease;
-  
-  &:hover {
-    transform: translateY(-2px);
-  }
-}
-
-ion-button {
-  transition: all 0.2s ease;
-  
-  &:hover:not([disabled]) {
-    transform: translateY(-1px);
-  }
-}
-
-// Estados de loading
-.loading-state {
-  opacity: 0.6;
-  pointer-events: none;
-}
+/* El modo oscuro se manejará con variables, así que no hace falta sobreescribir mucho */
