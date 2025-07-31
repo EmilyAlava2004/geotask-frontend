@@ -367,6 +367,18 @@ task.status = newStatus;
   viewOnMap(task: TaskDisplay) {
     // Navegar al mapa con la tarea seleccionada
     console.log('Viewing task on map:', task);
+    if (task.location) {
+      this.router.navigate(['/tabs/mapa'], {
+        queryParams: {
+          lat: task.location.latitude,
+          lng: task.location.longitude,
+          taskId: task.id
+        }
+      });
+      } else {
+      this.showErrorToast('Ubicación no disponible para esta tarea');
+      }
+
   }
 
   async editTask(task: TaskDisplay) {
