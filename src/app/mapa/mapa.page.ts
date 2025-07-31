@@ -48,14 +48,8 @@ export class MapaPage implements OnInit {
   }
 
   ngOnInit() {
-  this.cargarUbicaciones();
-
-  // 👇 Suscribirse a cambios de tareas
-  this.taskService.tasksChanged$.subscribe(() => {
-    console.log('📢 Cambios en tareas detectados, recargando...');
-    this.cargarTareasConUbicacion();
-  });
-}
+    this.cargarUbicaciones();
+  }
 
    async ngAfterViewInit() {
     console.log('ngAfterViewInit ejecutado');
