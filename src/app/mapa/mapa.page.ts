@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { StorageService } from '../services/storage.service';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonButton,
   IonItem, IonGrid, IonLabel, IonRow, IonCol, IonSelect, IonSelectOption, IonCard, IonCardHeader, IonCardContent } from '@ionic/angular/standalone';
@@ -24,7 +25,8 @@ import { Task } from '../interface/Itask.interface';
   ]
 })
 export class MapaPage implements OnInit {
-
+  
+  proximityRadius: number = 200;
   lastLocationId: number | null = null;
   currentCoords: { lat: number; lng: number } | null = null;
   nuevasCoords: { lat: number; lng: number } | null = null;
@@ -38,14 +40,16 @@ export class MapaPage implements OnInit {
 
   constructor(
     private locationService: LocationService,
-    private taskService: TaskService
+    private taskService: TaskService,
+    private storageService: StorageService
   ) {
     this.directionsClient = mbxDirections({
       accessToken: 'pk.eyJ1IjoidGhvbWFza2x6IiwiYSI6ImNsM3VibWJwbTI4emkzZXBlamVjOHp0Z2YifQ.QhFxYxdIC2m4vGlEkMqrow'
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+    await this.cargarRadioProximidad();
     this.cargarUbicaciones();
   }
 
@@ -61,12 +65,88 @@ export class MapaPage implements OnInit {
   }
 
   async getCurrentPosition() {
-    const coordinates = await Geolocation.getCurrentPosition();
-    const { latitude, longitude } = coordinates.coords;
-    this.currentCoords = { lat: latitude, lng: longitude };
-    this.cargarMapa(longitude, latitude);
-    console.log('Posición actual:', latitude, longitude);
+  const coordinates = await Geolocation.getCurrentPosition();
+  const { latitude, longitude } = coordinates.coords;
+
+  this.currentCoords = { lat: latitude, lng: longitude };
+  this.cargarMapa(longitude, latitude);
+  this.dibujarCirculoProximidad(longitude, latitude);
+  console.log('📍 Posición actual:', latitude, longitude);
+}
+
+dibujarCirculoProximidad(lng: number, lat: number) {
+  const circleGeoJson = this.generarCirculo(lng, lat, this.proximityRadius);
+
+  if (this.map.getLayer('proximity-circle')) {
+    this.map.removeLayer('proximity-circle');
   }
+  if (this.map.getSource('proximity-circle')) {
+    this.map.removeSource('proximity-circle');
+  }
+
+  this.map.addSource('proximity-circle', {
+    type: 'geojson',
+    data: circleGeoJson
+  });
+
+  this.map.addLayer({
+    id: 'proximity-circle',
+    type: 'fill',
+    source: 'proximity-circle',
+    layout: {},
+    paint: {
+      'fill-color': '#00BFFF',
+      'fill-opacity': 0.25
+    }
+  });
+
+  console.log(`🟢 Círculo de proximidad de ${this.proximityRadius}m dibujado`);
+}
+
+  async cargarRadioProximidad() {
+  const settings = await this.storageService.get('appSettings');
+  if (settings?.mapSettings?.proximityRadius) {
+    this.proximityRadius = settings.mapSettings.proximityRadius;
+    console.log('Radio de proximidad cargado:', this.proximityRadius);
+  }
+}
+
+async ionViewWillEnter() {
+  await this.cargarRadioProximidad();   // 👈 lee de Storage
+  if (this.map && this.currentCoords) {
+    // Redibuja el círculo con el nuevo radio
+    this.dibujarCirculoProximidad(this.currentCoords.lng, this.currentCoords.lat);
+    // Opcional: vuelve a comprobar tareas cercanas
+    this.checkNearbyTasks();
+  }
+}
+
+// Crea un círculo GeoJSON alrededor de (lng, lat) con un radio en metros
+generarCirculo(lng: number, lat: number, radiusInMeters: number): GeoJSON.Feature<GeoJSON.Polygon> {
+  const points = 64;
+  const coords = [];
+  const distanceX = radiusInMeters / (111.32 * 1000 * Math.cos(lat * Math.PI / 180));
+  const distanceY = radiusInMeters / (110.574 * 1000);
+
+  for (let i = 0; i < points; i++) {
+    const theta = (i / points) * (2 * Math.PI);
+    const x = distanceX * Math.cos(theta);
+    const y = distanceY * Math.sin(theta);
+
+    coords.push([lng + x, lat + y]);
+  }
+
+  coords.push(coords[0]); // cerrar el polígono
+
+  return {
+    type: 'Feature',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [coords]
+    },
+    properties: {}
+  };
+}
 
   cargarMapa(longitud: number, latitud: number) {
     this.map = new mapboxgl.Map({
@@ -394,7 +474,7 @@ export class MapaPage implements OnInit {
 
       const { latitude, longitude, geofence_radius } = locationObj;
       const distance = this.getDistanceInMeters(userLat, userLng, Number(latitude), Number(longitude));
-      const radius = geofence_radius || 100;
+      const radius = this.proximityRadius;
 
       console.log(`📏 Distancia a "${task.title}": ${distance.toFixed(2)}m (radio: ${radius}m)`);
 

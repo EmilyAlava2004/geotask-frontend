@@ -106,15 +106,30 @@ export class SettingsPage implements OnInit {
     this.loadSettings();
   }
 
-  // Cargar configuraciones guardadas
   async loadSettings() {
   const savedSettings = await this.storageService.get('appSettings');
   if (savedSettings) {
-    Object.assign(this, savedSettings);
-    this.applyTheme(this.appSettings.theme); // si estás usando temas
+    if (savedSettings.notifications) {
+      this.notifications = savedSettings.notifications;
+    }
+    if (savedSettings.mapSettings) {
+      this.mapSettings = savedSettings.mapSettings;
+    }
+    if (savedSettings.syncSettings) {
+      this.syncSettings = savedSettings.syncSettings;
+    }
+    if (savedSettings.securitySettings) {
+      this.securitySettings = savedSettings.securitySettings;
+    }
+    if (savedSettings.appSettings) {
+      this.appSettings = savedSettings.appSettings;
+      this.applyTheme(this.appSettings.theme);
+    }
+
     console.log('Configuración cargada:', savedSettings);
   }
 }
+
 
 async saveSettings() {
   const loading = await this.loadingCtrl.create({
@@ -153,6 +168,11 @@ console.log('Configuración guardada:', allSettings);
     });
     await toast.present();
   }
+}
+async applyMapSettings() {
+  await this.saveSettings();                 // guarda en Storage
+  await this.showToast('Configuración aplicada', 'success');
+  this.navCtrl.back();                       // vuelve al mapa
 }
 
   // Sincronizar ahora
@@ -248,6 +268,19 @@ console.log('Configuración guardada:', allSettings);
   }
 
   applyTheme(theme: string) {
-    document.body.classList.toggle('dark', theme === 'dark');
+  let appliedTheme = theme;
+  if (theme === 'auto') {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    appliedTheme = prefersDark ? 'dark' : 'light';
   }
+  document.body.setAttribute('color-theme', appliedTheme);
+}
+
+
+onThemeChange() {
+  this.applyTheme(this.appSettings.theme);
+  this.saveSettings();
+}
+
+
 }

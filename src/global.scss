@@ -64,3 +64,48 @@
   --ion-color-shade: var(--ion-color-custom-shade);
   --ion-color-tint: var(--ion-color-custom-tint);
 }
+
+/* ======= Tema Claro ======= */
+[color-theme='light'] {
+  --ion-background-color: #ffffff;
+  --ion-text-color: #000000;
+
+  --ion-item-background: #ffffff;
+  --ion-card-background: #f0f0f0;
+
+  --ion-color-primary: #5aad85;
+  --ion-color-medium: #666666;
+  --ion-color-step-600: #222;
+
+  background-color: var(--ion-background-color);
+  color: var(--ion-text-color);
+}
+
+/* ======= Tema Oscuro ======= */
+[color-theme='dark'] {
+  --ion-background-color: #121212;
+  --ion-text-color: #ffffff;
+
+  --ion-item-background: #1e1e1e;
+  --ion-card-background: #1c1c1c;
+
+  --ion-color-primary: #6bb692;
+  --ion-color-medium: #cccccc;
+  --ion-color-step-600: #f1f1f1;
+
+  background-color: var(--ion-background-color);
+  color: var(--ion-text-color);
+}
+
+body[color-theme='dark'] {
+  p, h1, h2, h3, h4, h5, h6, span, div, label, ion-label, ion-title {
+    color: var(--ion-text-color) !important;
+  }
+}
+
+body[color-theme='light'] {
+  p, h1, h2, h3, h4, h5, h6, span, div, label, ion-label, ion-title {
+    color: var(--ion-text-color) !important;
+  }
+}
+

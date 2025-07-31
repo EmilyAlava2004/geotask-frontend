@@ -19,21 +19,29 @@ export class AppComponent {
   }
 
   initializeApp() {
-    // Forzar tema claro completamente
-    document.body.classList.remove('dark');
-    document.documentElement.classList.remove('dark');
-    
-    // Remover cualquier clase de tema oscuro que pueda existir
-    const htmlElement = document.querySelector('html');
-    if (htmlElement) {
-      htmlElement.classList.remove('dark');
-      htmlElement.classList.add('ion-palette-light');
-    }
+  const savedTheme = localStorage.getItem('appSettings');
 
-    // Sobrescribir las variables CSS de Ionic para tema claro
-    document.documentElement.style.setProperty('--ion-background-color', '#ffffff');
-    document.documentElement.style.setProperty('--ion-background-color-rgb', '255,255,255');
-    document.documentElement.style.setProperty('--ion-text-color', '#000000');
-    document.documentElement.style.setProperty('--ion-text-color-rgb', '0,0,0');
+  let theme = 'auto';
+
+  if (savedTheme) {
+    try {
+      const parsed = JSON.parse(savedTheme);
+      theme = parsed.appSettings?.theme || 'auto';
+    } catch (e) {
+      console.warn('Error al leer tema guardado:', e);
+    }
   }
+
+  this.applyTheme(theme);
+}
+applyTheme(theme: string) {
+  let appliedTheme = theme;
+
+  if (theme === 'auto') {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    appliedTheme = prefersDark ? 'dark' : 'light';
+  }
+  document.body.setAttribute('color-theme', appliedTheme);
+}
+
 }

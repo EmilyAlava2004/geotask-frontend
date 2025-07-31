@@ -81,7 +81,7 @@
           <ion-label slot="end">1000m</ion-label>
         </ion-range>
       </ion-item>
-
+      <ion-button expand="full" color="primary" (click)="applyMapSettings()"> Aplicar </ion-button>
       <ion-item>
         <ion-label>
           <h3>Mostrar Ubicación Actual</h3>
@@ -139,18 +139,15 @@
       <ion-card-title>Aplicación</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <ion-item>
-        <ion-label>Tema</ion-label>
-        <ion-select 
-          [(ngModel)]="appSettings.theme" 
-          placeholder="Seleccionar"
-          slot="end">
-          <ion-select-option value="auto">Automático</ion-select-option>
-          <ion-select-option value="light">Claro</ion-select-option>
-          <ion-select-option value="dark">Oscuro</ion-select-option>
-        </ion-select>
-      </ion-item>
-
+      <ion-select 
+        [(ngModel)]="appSettings.theme" 
+        placeholder="Seleccionar"
+        slot="end"
+        (ionChange)="onThemeChange()">
+        <ion-select-option value="auto">Automático</ion-select-option>
+        <ion-select-option value="light">Claro</ion-select-option>
+        <ion-select-option value="dark">Oscuro</ion-select-option>
+      </ion-select>
       <ion-button 
         expand="block" 
         fill="outline"
