@@ -10,7 +10,7 @@ import mbxDirections from '@mapbox/mapbox-sdk/services/directions';
 import { Geolocation } from '@capacitor/geolocation';
 import { LocationService, Location } from 'src/app/services/location.service';
 import { TaskService, } from 'src/app/services/task.service';
-
+import { Storage } from '@ionic/storage-angular';
 import { Task } from '../interface/Itask.interface';
 
 @Component({
@@ -25,7 +25,7 @@ import { Task } from '../interface/Itask.interface';
   ]
 })
 export class MapaPage implements OnInit {
-  
+
   proximityRadius: number = 200;
   lastLocationId: number | null = null;
   currentCoords: { lat: number; lng: number } | null = null;
@@ -37,8 +37,7 @@ export class MapaPage implements OnInit {
   filtroCategoria: string = 'all';
   map!: mapboxgl.Map;
   directionsClient: any;
-
-  constructor(
+ constructor(
     private locationService: LocationService,
     private taskService: TaskService,
     private storageService: StorageService
@@ -48,12 +47,17 @@ export class MapaPage implements OnInit {
     });
   }
 
-  async ngOnInit() {
-    await this.cargarRadioProximidad();
-    this.cargarUbicaciones();
-  }
+  ngOnInit() {
+  this.cargarUbicaciones();
 
-  async ngAfterViewInit() {
+  // 👇 Suscribirse a cambios de tareas
+  this.taskService.tasksChanged$.subscribe(() => {
+    console.log('📢 Cambios en tareas detectados, recargando...');
+    this.cargarTareasConUbicacion();
+  });
+}
+
+   async ngAfterViewInit() {
     console.log('ngAfterViewInit ejecutado');
     await this.getCurrentPosition();
 
@@ -65,14 +69,12 @@ export class MapaPage implements OnInit {
   }
 
   async getCurrentPosition() {
-  const coordinates = await Geolocation.getCurrentPosition();
-  const { latitude, longitude } = coordinates.coords;
-
-  this.currentCoords = { lat: latitude, lng: longitude };
-  this.cargarMapa(longitude, latitude);
-  this.dibujarCirculoProximidad(longitude, latitude);
-  console.log('📍 Posición actual:', latitude, longitude);
-}
+    const coordinates = await Geolocation.getCurrentPosition();
+    const { latitude, longitude } = coordinates.coords;
+    this.currentCoords = { lat: latitude, lng: longitude };
+    this.cargarMapa(longitude, latitude);
+    console.log('Posición actual:', latitude, longitude);
+  }
 
 dibujarCirculoProximidad(lng: number, lat: number) {
   const circleGeoJson = this.generarCirculo(lng, lat, this.proximityRadius);
@@ -157,7 +159,7 @@ generarCirculo(lng: number, lat: number, radiusInMeters: number): GeoJSON.Featur
       zoom: 13,
     });
 
-    // ✅ Importante: esperar a que el mapa se redimensione
+     // ✅ Importante: esperar a que el mapa se redimensione
     this.map.on('load', () => {
       this.map.resize();
       console.log('Mapa redimensionado y listo');
@@ -264,10 +266,9 @@ generarCirculo(lng: number, lat: number, radiusInMeters: number): GeoJSON.Featur
     const existingTaskMarkers = document.querySelectorAll('.task-marker');
     existingTaskMarkers.forEach(marker => marker.remove());
 
-    this.tasks.forEach((task, index) => {
+       this.tasks.forEach((task, index) => {
       // ✅ Obtener ubicación de diferentes propiedades posibles
       const locationObj = task.location || (task as any).location || (task as any).position;
-
       if (!task?.id || !locationObj) {
         console.log('⚠️ Saltando tarea sin ID o ubicación:', task);
         return;
