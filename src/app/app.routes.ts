@@ -38,8 +38,12 @@ export const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'logo', // 🚀 Ahora redirige primero al logo
     pathMatch: 'full',
+  },
+  {
+    path: 'logo',
+    loadComponent: () => import('./logo/logo.page').then( m => m.LogoPage)
   },
   {
     path: 'login',
