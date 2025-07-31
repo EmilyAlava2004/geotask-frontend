@@ -3,16 +3,16 @@ import { NavController, ToastController, LoadingController, AlertController, Act
 //import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { FormsModule } from '@angular/forms';
 import { StorageService } from '../services/storage.service';
-import { 
-  IonHeader, 
-  IonIcon, 
-  IonCard, 
-  IonToolbar, 
-  IonButton, 
-  IonButtons, 
-  IonBackButton, 
-  IonTitle, 
-  IonContent, 
+import {
+  IonHeader,
+  IonIcon,
+  IonCard,
+  IonToolbar,
+  IonButton,
+  IonButtons,
+  IonBackButton,
+  IonTitle,
+  IonContent,
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
@@ -99,7 +99,7 @@ export class SettingsPage implements OnInit {
     private toastCtrl: ToastController,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
-    private storageService: StorageService 
+    private storageService: StorageService
   ) { }
 
   ngOnInit() {
@@ -133,7 +133,7 @@ async saveSettings() {
     };
 
     await this.storageService.set('appSettings', allSettings);
-console.log('Configuración guardada:', allSettings); 
+console.log('Configuración guardada:', allSettings);
     this.applyTheme(this.appSettings.theme); // si aplica
 
     const toast = await this.toastCtrl.create({
@@ -165,7 +165,7 @@ console.log('Configuración guardada:', allSettings);
     try {
       // Simular sincronización
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
+
       this.appInfo.lastSync = 'Ahora mismo';
       await loading.dismiss();
       this.showToast('Sincronización completada', 'success');
@@ -190,14 +190,14 @@ console.log('Configuración guardada:', allSettings);
           handler: async () => {
             const loading = await this.loadingCtrl.create({
               message: 'Limpiando caché...'
-              
+
             });
             await loading.present();
 
             try {
               // Simular limpieza de caché
               await new Promise(resolve => setTimeout(resolve, 2000));
-              
+
               await loading.dismiss();
               await this.storageService.clear();
               this.showToast('Caché limpiado exitosamente', 'success');
@@ -210,7 +210,7 @@ console.log('Configuración guardada:', allSettings);
       ]
     });
     await alert.present();
-    
+
   }
 
   // Mostrar información de la app
@@ -218,7 +218,7 @@ console.log('Configuración guardada:', allSettings);
     const alert = await this.alertCtrl.create({
       header: 'Acerca de GeoTask Manager',
       message: `
-        "GeoTask Manager" es una aplicación móvil empresarial que revoluciona la gestión de tareas mediante la integración inteligente de geolocalización. Esta solución permite a usuarios profesionales, equipos de trabajo remoto y empresas con operaciones geográficamente distribuidas optimizar su productividad vinculando tareas específicas a ubicaciones del mundo real.
+        GeoTask Manager es una aplicación móvil diseñada para facilitar la gestión de tareas geolocalizadas. Está pensada para profesionales, equipos de trabajo remoto y empresas que operan en diferentes ubicaciones físicas. La app permite crear, organizar y recibir notificaciones de tareas asociadas a lugares reales, optimizando la productividad y el tiempo de desplazamiento gracias a su integración con mapas y funciones de geolocalización en tiempo real.
       `,
       buttons: ['Cerrar']
     });

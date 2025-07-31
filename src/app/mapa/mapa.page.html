@@ -7,22 +7,6 @@
 <ion-content fullscreen class="ion-padding">
   <div id="map"></div>
 
-  <!-- Filtro por categoría -->
-  <ion-item>
-    <ion-label>Filtrar por categoría</ion-label>
-    <ion-select [(ngModel)]="filtroCategoria" (ionChange)="filtrarTareas()">
-     <ion-select-option value="all">Todas</ion-select-option>
-<ion-select-option value="Work">Trabajo</ion-select-option>
-<ion-select-option value="Personal">Personal</ion-select-option>
-<ion-select-option value="Study">Estudio</ion-select-option>
-<ion-select-option value="Urgent">Urgente</ion-select-option>
-<ion-select-option value="Health">Salud</ion-select-option>
-<ion-select-option value="other">Otra</ion-select-option>
-
-      <!-- Agrega más categorías si las tienes -->
-    </ion-select>
-  </ion-item>
-
   <!-- Seleccionar ubicación para tarea -->
   <ion-card>
     <ion-card-header>

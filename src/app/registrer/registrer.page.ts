@@ -28,7 +28,7 @@ export class RegistrerPage  {
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
   acceptTerms: boolean = false;
-  
+
   constructor(
      private router: Router,
     private alertController: AlertController,
@@ -118,13 +118,13 @@ export class RegistrerPage  {
 
         // 🎉 MOSTRAR MENSAJE DE ÉXITO
         await this.showToast('¡Cuenta creada exitosamente! Ya puedes agregar comentarios.', 'success');
-        
+
         // 👋 MOSTRAR ALERTA DE BIENVENIDA
         await this.showWelcomeAlert(result.users.user || this.user);
-        
+
         // 🚀 REDIRIGIR A HOME (usuario ya autenticado automáticamente)
         this.router.navigate(['/tabs/home']);
-        
+
       } else {
         // ❌ ERROR EN EL REGISTRO
         await this.showAlert('Error de registro', result?.message || 'Error al crear la cuenta');
@@ -231,25 +231,39 @@ export class RegistrerPage  {
   }
 
   async showTermsAndConditions() {
-    const alert = await this.alertController.create({
-      header: 'Términos y Condiciones',
-      message: 'Estimado ingeniero esta aplicación se ha hecho con mucho esfuerzo y dolores de cabeza, por favor se requiere una buena calificación :) ',
-      buttons: [
-        {
-          text: 'Cerrar',
-          role: 'cancel'
-        },
-        {
-          text: 'Aceptar',
-          handler: () => {
-            this.acceptTerms = true;
-          }
-        }
-      ]
-    });
+  const alert = await this.alertController.create({
+    header: 'Términos y Condiciones',
+    message: `
+      GeoTask Manager
+      es una aplicación desarrollada con fines académicos que permite gestionar tareas asociadas a ubicaciones geográficas en tiempo real.
 
-    await alert.present();
-  }
+      Al utilizar esta aplicación, usted acepta el uso de su ubicación para ofrecer funciones como alertas de proximidad, cálculo de rutas y visualización de tareas en mapas.
+
+      La información proporcionada (nombre, correo, tareas, ubicaciones) será utilizada únicamente para el funcionamiento interno de la app. Sus datos estarán protegidos mediante autenticación segura con JWT y cifrado de contraseñas.
+
+      Esta aplicación requiere conexión a Internet para sincronización, aunque permite funcionamiento básico en modo offline.
+
+      El uso indebido de la app o la alteración del sistema puede conllevar la restricción de acceso.
+      
+      Gracias por utilizar GeoTask Manager.
+    `,
+    buttons: [
+      {
+        text: 'Cerrar',
+        role: 'cancel'
+      },
+      {
+        text: 'Aceptar',
+        handler: () => {
+          this.acceptTerms = true;
+        }
+      }
+    ]
+  });
+
+  await alert.present();
+}
+
 
   private async showToast(message: string, color: string = 'primary') {
     const toast = await this.toastController.create({

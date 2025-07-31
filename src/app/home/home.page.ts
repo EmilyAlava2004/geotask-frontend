@@ -348,7 +348,7 @@ generateCalendar() {
   viewTaskLocation(task: Task) {
     // Navegar al mapa con la ubicación de la tarea
     if (task.location) {
-      this.router.navigate(['/map'], {
+      this.router.navigate(['/tabs/mapa'], {
         queryParams: {
           lat: task.location.latitude,
           lng: task.location.longitude,
